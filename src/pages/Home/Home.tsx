@@ -28,12 +28,21 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ searchTerm, setSearchTerm }) => {
-    const { data, loading } = useApp(); // Data de la API disponible aquí
+    const { frontConfig, data, loading } = useApp(); // Data de la API disponible aquí
+    const mainBanner = frontConfig?.banners?.[0]; //Primer banner de la lista
+
     const { 
         cart, orders, isCartOpen, setIsCartOpen, isProfileOpen, setIsProfileOpen,
         isCheckoutOpen, setIsCheckoutOpen, addToCart, updateQuantity, 
         removeFromCart, handleCheckoutComplete, cartCount 
     } = useCart();
+
+    const heroData = {
+        title: mainBanner?.title || "STREET ESSENTIALS",
+        subtitle: mainBanner?.subtitle || "New Era Collection",
+        image: mainBanner?.image || "./assets/herobanner.png",
+        ctaText: mainBanner?.cta?.text || "Explorar tienda"
+    };
 
     // --- ESTADOS DE NEGOCIO LOCALES (Específicos de la página) ---
     const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(null);
@@ -79,30 +88,36 @@ const Home: React.FC<HomeProps> = ({ searchTerm, setSearchTerm }) => {
             <main className="flex-grow">
                 
                 <AnnouncementBar 
-                messages={["3X2 EN TODA LA WEB", "ENVÍO GRATIS +$120.000", "6 CUOTAS SIN INTERÉS"]} 
+                    messages={["3X2 EN TODA LA WEB", "ENVÍO GRATIS + $120.000", "6 CUOTAS SIN INTERÉS"]} 
                 />
 
                 <HeroBanner 
-                title={<>STREET <br/> ESSENTIALS</>} 
-                subtitle="New Era Collection" 
-                image="./assets/herobanner.png"
-                onCtaClick={() => document.getElementById('shop-section')?.scrollIntoView({behavior: 'smooth'})} 
+                    banners={frontConfig?.banners || []}
+                    onCtaClick={(url) => {
+                        if (url.startsWith('#')) {
+                        const targetId = url.replace('#', '');
+                        document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                        // Si es una URL externa o de otra página
+                        window.location.href = url;
+                        }
+                    }}
                 />
 
                 <FilterBar 
-                categories={categories} 
-                activeCategory={activeCategory} 
-                onCategoryChange={setActiveCategory} 
-                sortBy={sortBy} 
-                onSortChange={(v) => setSortBy(v as any)} 
+                    categories={categories} 
+                    activeCategory={activeCategory} 
+                    onCategoryChange={setActiveCategory} 
+                    sortBy={sortBy} 
+                    onSortChange={(v) => setSortBy(v as any)} 
                 />
 
                 <ProductGrid 
-                products={filteredProducts} 
-                searchTerm={searchTerm} 
-                onClearSearch={() => setSearchTerm('')} 
-                onQuickView={setSelectedQuickView} 
-                onResetFilters={() => {setActiveCategory('Todos'); setSearchTerm('');}} 
+                    products={filteredProducts} 
+                    searchTerm={searchTerm} 
+                    onClearSearch={() => setSearchTerm('')} 
+                    onQuickView={setSelectedQuickView} 
+                    onResetFilters={() => {setActiveCategory('Todos'); setSearchTerm('');}} 
                 />
 
                 <LocationsSection />
