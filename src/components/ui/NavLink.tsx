@@ -35,7 +35,7 @@ const NavLink: React.FC<NavLinkProps> = ({ item, onClick, className = "", showSu
 
       {/* Renderizado condicional del Submenú */}
       {hasSubmenu && (
-        <div className="absolute top-full left-0 hidden group-hover:block animate-in fade-in slide-in-from-top-1 duration-200 z-50">
+        <div className="bg-white/30 absolute top-full left-0 hidden group-hover:block animate-in fade-in slide-in-from-top-1 duration-200 z-50">
           {/* mt-[-10px] para que no haya "hueco" y no se cierre al mover el mouse */}
           <div className="bg-white/90 backdrop-blur-md shadow-xl border border-gray-100 border-0 p-6 min-w-[220px]">
             {item.submenu?.map((sub, idx) => (

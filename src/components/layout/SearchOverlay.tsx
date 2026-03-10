@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 
 interface SearchOverlayProps {
@@ -14,14 +13,12 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTe
   // 1. Lógica para cerrar con ESCAPE y buscar con ENTER
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
+      if (e.key === 'Escape') onClose();
       if (e.key === 'Enter') {
-        // Al apretar Enter, simplemente cerramos el overlay
-        // Como el input ya actualizó el estado 'searchTerm',
-        // la Home filtrará automáticamente los productos.
-        onClose();
+        if (searchTerm.trim()) {
+          onSearchChange(searchTerm); // Esto disparará el navigate en el Layout
+          onClose();
+        }
       }
     };
 
@@ -32,7 +29,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTe
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, searchTerm, onSearchChange]);
 
   // 2. Auto-focus al abrir
   useEffect(() => {
@@ -47,7 +44,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTe
     <div className="fixed inset-0 z-[100] bg-white animate-in slide-in-from-top duration-300">
       <div className="max-w-7xl mx-auto px-6 h-full flex flex-col">
         <div className="flex items-center justify-between h-20 border-b border-gray-100">
-          <span className="text-[10px] font-black uppercase tracking-[4px]">Buscador PULSE</span>
+          <span className="text-[10px] font-black uppercase tracking-[4px]">Buscador PULSO</span>
           <button onClick={onClose} className="text-gray-400 hover:text-black transition-colors">
             <i className="fa-solid fa-xmark text-xl"></i>
           </button>

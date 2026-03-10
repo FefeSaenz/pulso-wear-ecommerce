@@ -1,4 +1,4 @@
-# PULSE WEAR - Street Essentials Ecommerce
+# PULSO WEAR - Street Essentials Ecommerce
 
 Ecommerce de indumentaria urbana con enfoque en diseño minimalista y alto rendimiento. Construido con una arquitectura de componentes atómicos y gestión de estado global para máxima escalabilidad.
 
@@ -13,6 +13,7 @@ Ecommerce de indumentaria urbana con enfoque en diseño minimalista y alto rendi
 
 ## 🏗️ Arquitectura
 El proyecto sigue una estructura modular y reactiva para facilitar su mantenimiento como plantilla base:
+- `Layout/ (Pattern)`: Implementación de una estructura de contenedores globales que persiste la UI (Header, Footer, Modales) y gestiona el ciclo de vida de la navegación mediante Outlet.
 - `types/`: Definición de interfaces para el contrato de la API (MenuItem, Banner, FrontConfig).
 - `constants/`: Datos estáticos y configuraciones de negocio (MOCK_PRODUCTS, thresholds de envío).
 - `api/`: Configuración de Axios para consumo de datos asíncronos.
@@ -25,7 +26,6 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 
 
 ## ✅ Logros y Avances
-- [x] **Navegación Robusta:** Implementación de React Router con configuración de `basename` para despliegues.
 - [x] **Estado Global:** Migración exitosa a Context API para desacoplar la lógica del carrito de la UI.
 - [x] **Conexión API:** Integración de Axios para consumo de datos dinámicos de backend.
 - [x] **Refactorización Semántica:** Evolución de componentes (NavLink) para soportar navegación multinivel (Submenús) e iconos dinámicos.
@@ -39,9 +39,14 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Data Mapping & Resiliencia:** Implementación de un Mapper para estandarizar el contrato de la API y asegurar la integridad de la UI (solución de errores en QuickView).
 - [x] **Arquitectura de Hooks:** Desacoplamiento de la lógica de negocio mediante el hook useProductFilters, permitiendo una UI 100% declarativa y reactiva.
 - [x] **Full API Integration (Home):** Migración total de la Home de datos estáticos a consumo dinámico desde el backend.
+- [x] **Navegación Robusta:** Implementación de React Router con configuración de `basename` para despliegues.
+- [x] **Arquitectura de Layout Persistente:** Centralización de la UI global (Header, Footer, AnnouncementBar) permitiendo transiciones fluidas entre páginas sin pérdida de estado.
+- [x] **Optimización de Branding:** Integración de activos locales con procesamiento de imagen optimizado (Logo y Banners de respaldo).
+
 
 ## 🛠️ Próximos Pasos
-- [ ] RIP MOCK_PRODUCTS: Limpieza final de datos hardcodeados en componentes secundarios (CartRecommendations).
+- [ ] RIP MOCK_PRODUCTS: Limpieza final de datos hardcodeados.
 - [ ] Router Dinámico & Slugs: Desarrollo de rutas parametrizadas para categorías basadas en los Slugs de la API (/category/:id).
-- [ ] Filtros Avanzados: Implementación de lógica de filtrado dinámico (Server-side o Client-side avanzado).
+- [ ] Tienda Full (Products Page): Construcción de la vista general de productos con arquitectura de Sidebar.
+- [ ] Filtros por Facetas: Implementación de filtrado multidimensional (Talle, Color, Categoría) sincronizado con URLSearchParams.
 - [ ] Persistencia & Checkout: Sincronización con localStorage y finalización del flujo de pago y validación de órdenes.

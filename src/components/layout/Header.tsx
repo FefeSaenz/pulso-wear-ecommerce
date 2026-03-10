@@ -2,6 +2,8 @@ import React from 'react';
 // Importamos el átomo NavLink desde la carpeta ui
 import NavLink from '../ui/NavLink';
 import { useApp } from '../../context/AppContext';
+import logoPulso from '@/public/assets/Logotipo principal PULSO.png';
+
 
 /**
  * PROPS INTERFACE
@@ -48,9 +50,17 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
       
       {/* LOGO Y NAVEGACIÓN IZQUIERDA */}
       <div className="flex items-center space-x-8">
-        <a href="/" className="text-3xl font-black tracking-tighter hover:opacity-80 transition-opacity">
+        <a href="/" className="flex items-center hover:opacity-80 transition-opacity py-1">
           {/*PULSE WEAR*/}
-          {logoText}
+          {/* Si tenemos la imagen local, la mostramos; si no, volvemos al texto de la API */}
+          {
+            logoPulso ? (
+              <img src={logoPulso} alt="Pulso Wear" className="h-14 md:h-16 w-auto object-contain object-left transition-all" />
+            ) : (
+              <span className="text-3xl font-black tracking-tighter">{logoText}</span>
+            )
+          }
+          
         </a>
         
         {/* Renderizado dinámico usando el componente atómico NavLink */}

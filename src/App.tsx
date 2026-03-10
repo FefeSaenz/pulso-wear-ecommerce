@@ -1,58 +1,36 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Contexts
-import { AppProvider } from './context/AppContext';
-import { CartProvider, useCart } from './context/CartContext';
+import { AppProvider } from '@/src/context/AppContext';
+import { CartProvider } from '@/src/context/CartContext';
 
-// Layout Components Globales
-import Header from './components/layout/Header';
-import SearchOverlay from './components/layout/SearchOverlay';
+// Layout Principal
+import Layout from '@/src/components/layout/Layout';
 
 // Pages
-import Home from './pages/Home/Home';
+import Home from '@/src/pages/Home/Home';
 
 const AppContent: React.FC = () => {
-  // --- ESTADOS DE INTERFAZ GLOBALES (Necesarios para Header y Search) ---
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // --- CONSUMO DE CONTEXTO PARA EL HEADER ---
-  const { setIsCartOpen, setIsProfileOpen, cartCount } = useCart();
-
   return (
-    <div className="min-h-screen flex flex-col pt-20">
-      
-      {/* NAVEGACIÓN Y BUSCADOR (Globales y conectados al Context) */}
-      <Header 
-        onOpenCart={() => setIsCartOpen(true)} 
-        onOpenProfile={() => setIsProfileOpen(true)}
-        onOpenSearch={() => setIsSearchOpen(true)}
-        cartCount={cartCount} 
-      />
-
-      <SearchOverlay 
-        isOpen={isSearchOpen} 
-        onClose={() => setIsSearchOpen(false)} 
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-      />
-
-      {/* CONFIGURACIÓN DE RUTAS */}
-      <Routes>
-        <Route 
-          path="/" 
-          element={
-            <Home 
-              searchTerm={searchTerm} 
-              setSearchTerm={setSearchTerm} 
-            />
-          } 
-        />
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        
         <Route path="/productos" element={<div className="p-20 text-center">Página de Productos próximamente</div>} />
-      </Routes>
-      
-    </div>
+        
+        <Route 
+          path="/category/:id" 
+          element={<div className="p-20 text-center text-2xl font-black">CATEGORÍA DINÁMICA</div>} 
+        />
+
+        {/* Página 404 (Opcional pero recomendado) */}
+        <Route 
+          path="*" 
+          element={<div className="p-20 text-center">404 - Página no encontrada</div>} 
+        />
+      </Route>
+    </Routes>
   );
 };
 

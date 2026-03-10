@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Banner } from '@/src/types/api';
 
+
 interface HeroBannerProps {
   banners: Banner[];
   onCtaClick: (url:string) => void;
@@ -84,22 +85,25 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ banners, onCtaClick }) => {
       ))}
 
       {/* CONTENIDO CENTRAL, con Key dinámico para reiniciar animación al cambiar */}
-      <div key={currentIndex} className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6 z-10 pointer-events-none">
+      {/*<div key={currentIndex} className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6 z-10 pointer-events-none">
+        
         <p className="text-[10px] md:text-[12px] font-black uppercase tracking-[6px] mb-4 animate-in fade-in slide-in-from-bottom duration-500">
           {currentBanner.subtitle}
         </p>
         <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] mb-8 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
           {currentBanner.title}
         </h1>
+        
         <button 
           onClick={() => onCtaClick(currentBanner.cta.url)}
           className="pointer-events-auto bg-white text-black px-12 py-5 text-[11px] font-black uppercase tracking-[4px] hover:bg-black hover:text-white transition-all transform active:scale-95 cursor-pointer"
         >
           {/*Explorar Tienda*/}
           {currentBanner.cta.text || 'Explorar'}
-        </button>
-      </div>
-
+        {/*</button>
+        
+      </div>*/}
+      
       {/* INDICADORES (DOTS INTERACTIVOS) - Centrados abajo */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex space-x-3 z-30">
         {banners.map((_, index) => (

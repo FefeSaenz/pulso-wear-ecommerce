@@ -1,47 +1,70 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 
-// Contexts
+// Contexts & Hooks
 import { useApp } from '@/src/context/AppContext'; // Consumo de la API
-import { useCart } from '@/src/context/CartContext'; // Consumo del Carrito Global
-
-// Hooks & Utils
-//import { mapApiProductToLocal } from '@/src/utils/mappers';
 import { useProductFilters } from '@/src/hooks/useProductFilters';
 import { Product } from '@/src/types/product.types';
-
-
-// Layout Components
-import Footer from '@/src/components/layout/Footer';
-import AnnouncementBar from '@/src/components/layout/AnnouncementBar';
-import CartDrawer from '@/src/components/cart/CartDrawer';
-import ProductGrid from '@/src/components/layout/ProductGrid';
-import LocationsSection from '@/src/components/layout/LocationsSection';
 
 // UI Components
 import HeroBanner from '@/src/components/ui/HeroBanner';
 import FilterBar from '@/src/components/ui/FilterBar';
-import QuickViewModal from '@/src/components/ui/QuickViewModal';
-import CheckoutModal from '@/src/components/ui/CheckoutModal';
-import UserProfile from '@/src/components/ui/UserProfile';
+import ProductGrid from '@/src/components/layout/ProductGrid';
+import LocationsSection from '@/src/components/layout/LocationsSection';
 
-interface HomeProps {
+//Assets
+import banner1 from '@/public/assets/PORTADA PAG WEB PULSO 1.png';
+import banner2 from '@/public/assets/PORTADA PAG WEB PULSO 2.png';
+
+// Definimos la interfaz del contexto que viene del Layout vía Outlet
+interface HomeContext {
+  setSelectedQuickView: (product: Product) => void;
   searchTerm: string;
   setSearchTerm: (val: string) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ searchTerm, setSearchTerm }) => {
-    const { frontConfig, loading } = useApp(); // Data de la API disponible aquí
+const Home: React.FC = () => {
+    const navigate = useNavigate();
+    const { frontConfig } = useApp(); // Data de la API disponible aquí
     
-    const { 
-        cart, orders, isCartOpen, setIsCartOpen, isProfileOpen, setIsProfileOpen, isCheckoutOpen, setIsCheckoutOpen, addToCart, updateQuantity, removeFromCart, handleCheckoutComplete 
-    } = useCart();
-
-    // --- ESTADOS DE NEGOCIO LOCALES (Estado local de la página)
-    const [selectedQuickView, setSelectedQuickView] = useState<Product | null>(null);
+    // Obtenemos las funciones y estados globales del Layout
+    const { setSelectedQuickView, searchTerm, setSearchTerm } = useOutletContext<HomeContext>();
     
-    // 3. Lógica de Negocio extraída del Hook (Custom Hook)
+    // Lógica de Negocio extraída del Hook (Custom Hook)
     const rawProducts = frontConfig?.featured_products?.products || [];
 
+    // LÓGICA DE BANNERS DINÁMICOS CON OVERRIDE LOCAL ---
+    const visualBanners = useMemo(() => {
+        const apiBanners = frontConfig?.banners || [];
+
+        // Si hay banners en la API, mapeamos y reemplazamos las imágenes por las locales
+        if (apiBanners.length > 0) {
+            return apiBanners.map((banner, index) => ({
+                ...banner,
+                // Al primer banner le ponemos banner1, al segundo banner2, el resto queda igual
+                image: index === 0 ? banner1 : index === 1 ? banner2 : banner.image
+            }));
+        }
+
+        // Si la API no devuelve banners (fallback), creamos la estructura mínima
+        return [
+            { 
+                id: 'local-1', 
+                title: 'STREET ESSENTIALS', 
+                subtitle: 'NEW COLLECTION 2026', 
+                image: banner1, 
+                cta: { url: '#', text: 'EXPLORAR TIENDA' } 
+            },
+            { 
+                id: 'local-2', 
+                title: 'PULSE MODE', 
+                subtitle: 'DROP EXCLUSIVO', 
+                image: banner2, 
+                cta: { url: '#', text: 'VER MÁS' } 
+            }
+        ];
+    }, [frontConfig?.banners]);
+    
     const {
         filteredProducts,
         activeCategory,
@@ -51,85 +74,43 @@ const Home: React.FC<HomeProps> = ({ searchTerm, setSearchTerm }) => {
         categories
     } = useProductFilters({ rawProducts, searchTerm });
 
-    // Early return
-    if (loading) return <div className="h-screen flex items-center justify-center font-bold text-xl bg-white">Cargando Pulso Wear...</div>;
-    
     return (
-        <>
-            <main className="flex-grow">
-                
-                <AnnouncementBar 
-                    messages={["3X2 EN TODA LA WEB", "ENVÍO GRATIS + $120.000", "6 CUOTAS SIN INTERÉS"]} 
-                />
-
-                <HeroBanner 
-                    banners={frontConfig?.banners || []}
-                    onCtaClick={(url) => {
-                        if (url.startsWith('#')) {
-                        const targetId = url.replace('#', '');
-                        document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
-                        } else {
-                        // Si es una URL externa o de otra página
-                        window.location.href = url;
-                        }
-                    }}
-                />
-
-                <FilterBar 
-                    categories={categories} 
-                    activeCategory={activeCategory} 
-                    onCategoryChange={setActiveCategory} 
-                    sortBy={sortBy} 
-                    onSortChange={(v) => setSortBy(v as any)} 
-                />
-
-                <ProductGrid 
-                    products={filteredProducts} 
-                    searchTerm={searchTerm} 
-                    onClearSearch={() => setSearchTerm('')} 
-                    onQuickView={setSelectedQuickView} 
-                    onResetFilters={() => { setActiveCategory('Todos'); setSearchTerm(''); }} 
-                />
-
-                <LocationsSection />
-                <Footer />
-            </main>
-
-            {/* COMPONENTES DE INTERACCIÓN (Consumiendo del Context) */}
-            <CartDrawer 
-                isOpen={isCartOpen} 
-                onClose={() => setIsCartOpen(false)} 
-                onOpenCheckout={() => { setIsCartOpen(false); setIsCheckoutOpen(true); }}
-                cart={cart}
-                onUpdateQuantity={updateQuantity}
-                onRemove={removeFromCart}
-                onAddFromRec={(p) => setSelectedQuickView(p)}
+        <div className="animate-in fade-in duration-700">
+            <HeroBanner 
+                /*banners={frontConfig?.banners || []} */
+                banners={visualBanners}
+                onCtaClick={(url) => {
+                if (url.startsWith('#')) {
+                    const targetId = url.replace('#', '');
+                    document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
+                } else if (url.startsWith('http')) {
+                    // Salida externa (Redes sociales, etc.)
+                    window.location.href = url;
+                } else {
+                    // Navegación interna SPA (React Router)
+                    navigate(url);
+                }
+            }}
             />
 
-            <QuickViewModal 
-                product={selectedQuickView}
-                onClose={() => setSelectedQuickView(null)}
-                onAddToCart={(product, size) => {
-                    // 1. Ejecuta la lógica global del carrito (guardar + abrir drawer)
-                    addToCart(product, size); 
-                    // 2. Limpia el estado local de la Home para cerrar este modal
-                    setSelectedQuickView(null); 
-                }}
+            <FilterBar 
+                categories={categories} 
+                activeCategory={activeCategory} 
+                onCategoryChange={setActiveCategory} 
+                sortBy={sortBy} 
+                onSortChange={(v) => setSortBy(v as any)} 
             />
 
-            <CheckoutModal 
-                isOpen={isCheckoutOpen}
-                onClose={() => setIsCheckoutOpen(false)}
-                cart={cart}
-                onComplete={handleCheckoutComplete}
+            <ProductGrid 
+                products={filteredProducts} 
+                searchTerm={searchTerm} 
+                onClearSearch={() => setSearchTerm('')} 
+                onQuickView={setSelectedQuickView} 
+                onResetFilters={() => { setActiveCategory('Todos'); setSearchTerm(''); }} 
             />
 
-            <UserProfile 
-                isOpen={isProfileOpen}
-                onClose={() => setIsProfileOpen(false)}
-                orders={orders}
-            />
-        </>
+            <LocationsSection />
+        </div>
     );
 };
 
