@@ -6,10 +6,10 @@ const api = axios.create({
     timeout: 8000,
 });
 
-export const getFrontData = async () => {
+export const getFrontData = async (): Promise<ApiResponse['data']> => {
     
     const response = await api.get<ApiResponse>("/");
-    return response.data.data.front;
+    return response.data.data;
 };
 
 export default api;

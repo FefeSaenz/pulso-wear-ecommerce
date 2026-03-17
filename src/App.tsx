@@ -9,7 +9,8 @@ import { CartProvider } from '@/src/context/CartContext';
 import Layout from '@/src/components/layout/Layout';
 
 // Pages
-import Home from '@/src/pages/Home/Home';
+import Home from '@/src/pages/Home';
+import Products from './pages/Products';
 
 const AppContent: React.FC = () => {
   return (
@@ -17,7 +18,7 @@ const AppContent: React.FC = () => {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         
-        <Route path="/productos" element={<div className="p-20 text-center">Página de Productos próximamente</div>} />
+        <Route path="/productos" element={<Products />} />
         
         <Route 
           path="/category/:id" 

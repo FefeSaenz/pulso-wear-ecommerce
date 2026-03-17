@@ -53,6 +53,7 @@ export interface FeaturedProduct {
   original_price: number | null;
   discount_percentage: number | null;
   main_image: string;
+  images?: string[];
   slug: string;
   badge?: string;
   url: string;
@@ -80,6 +81,9 @@ export interface ApiResponse {
   msg: string;
   data: {
     front: FrontConfig;
-    products: Product[];
+    products: {            // <--- Agregamos este objeto intermedio
+      products: Product[]; // <--- El array está acá adentro
+      meta?: any;          // Por si querés guardar el total_products, currency, etc.
+    };
   };
 }

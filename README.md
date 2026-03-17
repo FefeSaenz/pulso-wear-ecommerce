@@ -14,14 +14,14 @@ Ecommerce de indumentaria urbana con enfoque en diseño minimalista y alto rendi
 ## 🏗️ Arquitectura
 El proyecto sigue una estructura modular y reactiva para facilitar su mantenimiento como plantilla base:
 - `Layout/ (Pattern)`: Implementación de una estructura de contenedores globales que persiste la UI (Header, Footer, Modales) y gestiona el ciclo de vida de la navegación mediante Outlet.
-- `types/`: Definición de interfaces para el contrato de la API (MenuItem, Banner, FrontConfig).
+- `types/`: Definición de interfaces para el contrato de la API (MenuItem, Banner, FrontConfig) y el modelo de dominio complejo (Variantes, Talles, Colores).
 - `constants/`: Datos estáticos y configuraciones de negocio (MOCK_PRODUCTS, thresholds de envío).
 - `api/`: Configuración de Axios para consumo de datos asíncronos.
 - `styles/`: Sistema de diseño centralizado en globals.css (Tailwind v4 Layering).
-- `pages/`: Vistas principales (Home, Productos) que orquestan los componentes.
-- `context/`: Gestión de estado global (Carrito, Órdenes y datos de API).
+- `pages/`: Vistas principales (Home, Productos) que orquestan los componentes y gestionan la fusión inteligente de datos.
+- `context/`: Gestión de estado global (Carrito, Órdenes y centralización de datos del Backend).
 - `components/`: Componentes organizados por responsabilidad (Layout, UI, Cart).
-- `utils/mappers.ts`: Implementación del Adapter Pattern para transformar datos crudos de la API en modelos de datos consistentes para la UI.
+- `utils/mappers.ts`: Implementación del Adapter Pattern para transformar y normalizar datos crudos de la API en modelos de datos consistentes para la UI.
 - `hooks/`: Lógica de negocio reutilizable y encapsulada (Custom Hooks) para el manejo de filtros y estados complejos.
 
 
@@ -37,16 +37,17 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Refactorización Senior:** Reorganización del árbol de archivos eliminando ruido en la raíz y centralizando la lógica en /src.
 - [x] **Tipado Estricto:** Implementación de interfaces de TypeScript para todo el catálogo de productos y flujos de órdenes.
 - [x] **Data Mapping & Resiliencia:** Implementación de un Mapper para estandarizar el contrato de la API y asegurar la integridad de la UI (solución de errores en QuickView).
-- [x] **Arquitectura de Hooks:** Desacoplamiento de la lógica de negocio mediante el hook useProductFilters, permitiendo una UI 100% declarativa y reactiva.
+- [x] **Arquitectura de Hooks:** Desacoplamiento de la lógica mediante el hook universal `useProductFilters`, permitiendo una UI 100% declarativa y reactiva.
 - [x] **Full API Integration (Home):** Migración total de la Home de datos estáticos a consumo dinámico desde el backend.
 - [x] **Navegación Robusta:** Implementación de React Router con configuración de `basename` para despliegues.
 - [x] **Arquitectura de Layout Persistente:** Centralización de la UI global (Header, Footer, AnnouncementBar) permitiendo transiciones fluidas entre páginas sin pérdida de estado.
 - [x] **Optimización de Branding:** Integración de activos locales con procesamiento de imagen optimizado (Logo y Banners de respaldo).
-
+- [x] **Filtros por Facetas:** Implementación de filtrado multidimensional avanzado (Talle dependiente de Color, Categoría) sincronizado bidireccionalmente con URLSearchParams.
+- [x] **Tienda Full (Products Page):** Construcción de la vista general de productos con arquitectura de Sidebar, grilla reactiva y estados vacíos amigables.
+- [x] **Filtros por Facetas:** Implementación de filtrado multidimensional (Talle, Color, Categoría) sincronizado con URLSearchParams.
 
 ## 🛠️ Próximos Pasos
+- [ ] Menú Dinámico (Header): Conectar `NavLink.tsx` y el menú de navegación para renderizar las categorías directamente desde la API (`frontConfig.menu`).
 - [ ] RIP MOCK_PRODUCTS: Limpieza final de datos hardcodeados.
 - [ ] Router Dinámico & Slugs: Desarrollo de rutas parametrizadas para categorías basadas en los Slugs de la API (/category/:id).
-- [ ] Tienda Full (Products Page): Construcción de la vista general de productos con arquitectura de Sidebar.
-- [ ] Filtros por Facetas: Implementación de filtrado multidimensional (Talle, Color, Categoría) sincronizado con URLSearchParams.
 - [ ] Persistencia & Checkout: Sincronización con localStorage y finalización del flujo de pago y validación de órdenes.

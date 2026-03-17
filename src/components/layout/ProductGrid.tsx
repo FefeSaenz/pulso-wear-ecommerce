@@ -18,7 +18,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   onResetFilters 
 }) => {
   return (
-    <section className="px-6 md:px-12 py-16">
+    <section className="px-6 py-5">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-12">
           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
