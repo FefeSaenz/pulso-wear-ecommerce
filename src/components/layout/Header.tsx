@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 // Importamos el átomo NavLink desde la carpeta ui
-import NavLink from '../ui/NavLink';
-import { useApp } from '../../context/AppContext';
+import NavLink from '@/src/components/ui/NavLink';
+import { useApp } from '@/src/context/AppContext';
 import logoPulso from '@/public/assets/Logotipo principal PULSO.png';
 
 
@@ -15,19 +16,6 @@ interface HeaderProps {
   onOpenSearch: () => void;
   cartCount: number;
 }
-
-/**
- * NAVIGATION DATA
- * Centralizar los links permite que el componente sea más fácil de mantener.
- */
-const NAV_LINKS = [
-  { label: 'Shop', href: '#' },
-  { label: '3X2 🔥', href: '#' },
-  { label: 'Sale', href: '#' },
-  { label: 'Outlet 2X1', href: '#' },
-  { label: 'Gift Card', href: '#' },
-  { label: 'Locals', href: '#locals-section', isScroll: true },
-];
 
 const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch, cartCount }) => {
   // Consumimos la data real de la API desde nuestro Contexto
@@ -50,8 +38,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
       
       {/* LOGO Y NAVEGACIÓN IZQUIERDA */}
       <div className="flex items-center space-x-8">
-        <a href="/" className="flex items-center hover:opacity-80 transition-opacity py-1">
-          {/*PULSE WEAR*/}
+        <Link to="/" className="flex items-center hover:opacity-80 transition-opacity py-1">
           {/* Si tenemos la imagen local, la mostramos; si no, volvemos al texto de la API */}
           {
             logoPulso ? (
@@ -61,19 +48,10 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
             )
           }
           
-        </a>
+        </Link>
         
         {/* Renderizado dinámico usando el componente atómico NavLink */}
         <nav className="hidden md:flex items-center space-x-6 h-full">
-          {/*}
-          {NAV_LINKS.map((link) => (
-            <NavLink
-              key={link.label}
-              href={link.href}
-              label={link.label}
-              onClick={(e) => handleNavClick(e, link.href, link.isScroll)}
-            />
-          ))} */}
           {menuItems && menuItems.length > 0 ? (
             menuItems.map((item) => (
               <NavLink 

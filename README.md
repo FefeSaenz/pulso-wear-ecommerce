@@ -45,9 +45,11 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Filtros por Facetas:** Implementación de filtrado multidimensional avanzado (Talle dependiente de Color, Categoría) sincronizado bidireccionalmente con URLSearchParams.
 - [x] **Tienda Full (Products Page):** Construcción de la vista general de productos con arquitectura de Sidebar, grilla reactiva y estados vacíos amigables.
 - [x] **Filtros por Facetas:** Implementación de filtrado multidimensional (Talle, Color, Categoría) sincronizado con URLSearchParams.
+- [x] **Limpieza de Deuda Técnica (RIP Mocks):** Eliminación total de MOCK_PRODUCTS y hardcoding. El flujo de datos es ahora 100% dependiente de la API, manteniendo únicamente assets visuales locales como fallback estratégico.
+- [x] **Menú Dinámico (Header):** Conexión de `NavLink.tsx` y el menú de navegación para renderizar las categorías directamente desde la API usando el componente `<Link>` de React Router.
+- [x] **Router Dinámico & Categorías:** Desarrollo de rutas parametrizadas (`/category/:category` y `/offers`) en `App.tsx` con lectura mediante `useParams` para inyectar filtros automáticamente en la vista de Productos.
+- [x] **Navegación SPA Fluida y UX:** Eliminación de recargas de página y aplicación del patrón global de "ScrollToTop" (`useLocation`) para reiniciar la posición del scroll en cada transición de ruta.
 
 ## 🛠️ Próximos Pasos
-- [ ] Menú Dinámico (Header): Conectar `NavLink.tsx` y el menú de navegación para renderizar las categorías directamente desde la API (`frontConfig.menu`).
-- [ ] RIP MOCK_PRODUCTS: Limpieza final de datos hardcodeados.
-- [ ] Router Dinámico & Slugs: Desarrollo de rutas parametrizadas para categorías basadas en los Slugs de la API (/category/:id).
-- [ ] Persistencia & Checkout: Sincronización con localStorage y finalización del flujo de pago y validación de órdenes.
+- [ ] Product Detail Page (PDP) & Slugs: Creación de la vista individual y detallada de producto basada en su Slug (`/product/:slug`).
+- [ ] Persistencia & Checkout: Sincronización con localStorage, diseño del flujo de pago (Checkout) y validación final de órdenes.

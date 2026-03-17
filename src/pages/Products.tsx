@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from 'react';
-import { useSearchParams, useOutletContext } from 'react-router-dom';
+import { useSearchParams, useOutletContext, useParams } from 'react-router-dom';
 
 // Context & Hooks
 import { useApp } from '@/src/context/AppContext';
@@ -23,6 +23,9 @@ const Products: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { setSelectedQuickView } = useOutletContext<ProductsContext>();
     
+    const { category: paramCategory } = useParams<{ category: string }>();
+    const isOffersRoute = window.location.pathname === '/offers';
+
     // 1. COMBINACIÓN Y NORMALIZACIÓN DE DATA
     // Juntamos los productos del catálogo con los destacados de la Home
     const combinedProducts = useMemo(() => {
@@ -47,11 +50,21 @@ const Products: React.FC = () => {
                 }
             }
         });
+
+        if (isOffersRoute) {
+            return catalog.filter(p => p.discount_percentage && p.discount_percentage > 0);
+        }
+
         return catalog;
-    }, [allProducts, frontConfig]);
+    }, [allProducts, frontConfig, isOffersRoute]);
     
     // 2. PARÁMETROS DE LA URL (Single Source of Truth)
-    const categoryFilter = searchParams.get('categoria') || 'Todos';
+    // NUEVO: Ahora la categoría principal viene del Router (ej: /category/pantalones)
+    // Si no hay categoría en la ruta, miramos si hay en los searchParams (?categoria=...), y si no, "Todos".
+    const initialCategory = paramCategory 
+        ? paramCategory.charAt(0).toUpperCase() + paramCategory.slice(1) // Capitalizamos (pantalones -> Pantalones)
+        : searchParams.get('categoria') || 'Todos';
+
     const sizeFilter = searchParams.get('talle');
     const colorFilter = searchParams.get('color');
     const searchTerm = searchParams.get('search') || '';
@@ -63,6 +76,7 @@ const Products: React.FC = () => {
         setSortBy,
         categories,
         setActiveCategory,
+        activeCategory,
         setActiveSize,
         setActiveColor
     } = useProductFilters({ 
@@ -73,22 +87,34 @@ const Products: React.FC = () => {
     // 4. SINCRONIZACIÓN: URL -> HOOK
     // Esto asegura que si el usuario navega (o vuelve atrás), el hook se entere
     useEffect(() => {
-        setActiveCategory(categoryFilter);
+        // NUEVO: Le pasamos la categoría que leímos de la ruta dinámica
+        setActiveCategory(isOffersRoute ? 'Todos' : initialCategory);
         setActiveSize(sizeFilter);
         setActiveColor(colorFilter);
-    }, [categoryFilter, sizeFilter, colorFilter, setActiveCategory, setActiveSize, setActiveColor]);
+    }, [initialCategory, sizeFilter, colorFilter, setActiveCategory, setActiveSize, setActiveColor, isOffersRoute]);
     
     // 5. MANEJADOR DE CAMBIOS EN URL
     const handleFilterChange = (key: string, value: string | null) => {
         const newParams = new URLSearchParams(searchParams);
-        if (value && value !== 'Todos') newParams.set(key, value);
-        else newParams.delete(key);
+
+        if (key === 'categoria') {
+            if (value && value !== 'Todos') newParams.set(key, value);
+            else newParams.delete(key);
+        } else {
+            if (value) newParams.set(key, value);
+            else newParams.delete(key);
+        }
 
         // Si cambiamos categoría, talle o color, reseteamos el scroll arriba
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setSearchParams(newParams);
     };
 
+    // Título dinámico para el H1
+    const pageTitle = isOffersRoute 
+        ? '🔥 Ofertas Exclusivas' 
+        : (activeCategory === 'Todos' ? 'Catálogo Completo' : activeCategory);
+    
     if (loading) {
         return (
         <div className="min-h-screen flex items-center justify-center">
@@ -101,7 +127,7 @@ const Products: React.FC = () => {
             {/* BARRA SUPERIOR DE CATEGORÍAS Y ORDENAMIENTO */}
             <FilterBar 
                 categories={categories}
-                activeCategory={categoryFilter}
+                activeCategory={activeCategory}
                 onCategoryChange={(cat) => handleFilterChange('categoria', cat)}
                 sortBy={sortBy}
                 onSortChange={(val) => setSortBy(val as any)}
@@ -110,7 +136,7 @@ const Products: React.FC = () => {
                 {/* SIDEBAR DE FILTROS (IZQUIERDA) */}
                 <aside className="w-full md:w-64 shrink-0">
                     <FilterSidebar 
-                        activeFilters={{ categoryFilter, sizeFilter, colorFilter }}
+                        activeFilters={{ categorieFilter: activeCategory, sizeFilter, colorFilter }}
                         onFilterChange={handleFilterChange}
                     />
                 </aside>
@@ -119,7 +145,7 @@ const Products: React.FC = () => {
                 <main className="flex-1">
                     {/*<div className="mb-8">*/}
                         <h1 className="text-4xl font-black tracking-tighter uppercase italic italic-pulso">
-                            {categoryFilter === 'Todos' ? 'Catálogo Completo' : categoryFilter}
+                            {pageTitle}
                         </h1>
                     {/*</div>*/}
 
