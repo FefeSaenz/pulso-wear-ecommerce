@@ -2,8 +2,9 @@ import React, { useMemo } from 'react';
 import { useApp } from '@/src/context/AppContext';
 
 interface FilterSidebarProps {
-  activeFilters: { categoryFilter: string; sizeFilter: string | null; colorFilter: string | null; };
+  activeFilters: { sizeFilter: string | null; colorFilter: string | null; };
   onFilterChange: (key: string, value: string | null) => void;
+  onClearFilters: () => void; // Nueva prop para limpiar todo
 }
 
 const COLOR_MAP: Record<string, string> = {
@@ -25,21 +26,16 @@ const COLOR_SYSTEM: Record<string, { hex: string, group: string }> = {
 
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL'];
 
-const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterChange }) => {
+const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterChange, onClearFilters }) => {
   const { allProducts } = useApp();
-  const { frontConfig } = useApp();
-
-  // 1. Categorías únicas
-  const categories = useMemo(() => ['Todos', ...Array.from(new Set(allProducts.map(p => p.category)))], [allProducts]);
   
-  // 2. Talles únicos ordenados
+  // Talles únicos ordenados
   const sizes = useMemo(() => {
     const allSizes = allProducts.flatMap(p => 
       p.variants?.flatMap(v => v.sizes.map(s => s.size.toString())) || []
     );
     
     const unique = Array.from(new Set(allSizes));
-
     return unique.sort((a: string, b: string) => {
       const indexA = SIZE_ORDER.indexOf(a.toUpperCase());
       const indexB = SIZE_ORDER.indexOf(b.toUpperCase());
@@ -47,7 +43,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
     });
   }, [allProducts]);
 
-  // 3. Colores Únicos Normalizados
+  // Colores Únicos Normalizados
   const colors = useMemo(() => {
     const rawColors = allProducts.flatMap(p => p.variants?.map(v => v.color.name) || []);
     const groups = rawColors.map(name => COLOR_SYSTEM[name]?.group || name);
@@ -60,38 +56,45 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
     return found ? found.hex : '#ccc';
   };
 
+  const hasActiveFilters = activeFilters.sizeFilter || activeFilters.colorFilter;
+
   return (
     <div className="space-y-10">
       {/* BOTÓN LIMPIAR FILTROS (Solo si hay filtros activos) */}
-      {(activeFilters.categoryFilter !== 'Todos' || activeFilters.sizeFilter || activeFilters.colorFilter) && (
-        <button 
-          onClick={() => {
-            onFilterChange('categoria', 'Todos');
-            onFilterChange('talle', null);
-            onFilterChange('color', null);
-          }}
-          className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:underline mb-4"
-        >
-          ✕ Limpiar Filtros
-        </button>
-      )}
-
-      {/* SECCIÓN COLECCIONES */}
-      <div>
-        <h3 className="text-[10px] font-black uppercase tracking-[4px] mb-6 text-gray-400">Colecciones</h3>
-        <ul className="space-y-3">
-          {categories.map((cat) => (
-            <li key={cat}>
+      {/* SECCIÓN FILTROS ACTIVOS (CHIPS) */}
+      {hasActiveFilters && (
+        <div className="mb-6 p-4 bg-gray-50 border border-gray-100 rounded-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[10px] font-black uppercase tracking-[2px] text-black">Filtros Activos</h3>
+            <button 
+              onClick={onClearFilters}
+              className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:underline cursor-pointer"
+            >
+              ✕ Limpiar
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {activeFilters.sizeFilter && (
               <button 
-                onClick={() => onFilterChange('categoria', cat)} 
-                className={`text-xs uppercase transition-all cursor-pointer ${activeFilters.categoryFilter === cat ? 'font-black border-b-2 border-black' : 'text-gray-500 hover:text-black font-bold'}`}
+                onClick={() => onFilterChange('talle', null)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
               >
-                {cat}
+                Talle: {activeFilters.sizeFilter}
+                <span className="text-gray-400 group-hover:text-red-500">✕</span>
               </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+            )}
+            {activeFilters.colorFilter && (
+              <button 
+                onClick={() => onFilterChange('color', null)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
+              >
+                Color: {activeFilters.colorFilter}
+                <span className="text-gray-400 group-hover:text-red-500">✕</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* SECCIÓN TALLE */}
       <div>

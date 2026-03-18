@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from 'react';
-import { useSearchParams, useOutletContext, useParams } from 'react-router-dom';
+import { useSearchParams, useOutletContext, useParams, useNavigate } from 'react-router-dom';
 
 // Context & Hooks
 import { useApp } from '@/src/context/AppContext';
@@ -25,6 +25,7 @@ const Products: React.FC = () => {
     
     const { category: paramCategory } = useParams<{ category: string }>();
     const isOffersRoute = window.location.pathname === '/offers';
+    const navigate = useNavigate();
 
     // 1. COMBINACIÓN Y NORMALIZACIÓN DE DATA
     // Juntamos los productos del catálogo con los destacados de la Home
@@ -93,21 +94,29 @@ const Products: React.FC = () => {
         setActiveColor(colorFilter);
     }, [initialCategory, sizeFilter, colorFilter, setActiveCategory, setActiveSize, setActiveColor, isOffersRoute]);
     
-    // 5. MANEJADOR DE CAMBIOS EN URL
+    // 5. MANEJADOR DE NAVEGACIÓN Y FILTROS
+    // Este manejador controla la barra superior y cambia de PÁGINA
+    const handleCategoryNavigation = (cat: string) => {
+        if (cat === 'Todos') {
+            navigate('/productos');
+        } else {
+            navigate(`/category/${cat.toLowerCase()}`);
+        }
+    };
+
+    // Este manejador controla solo Talle y Color en la URL
     const handleFilterChange = (key: string, value: string | null) => {
         const newParams = new URLSearchParams(searchParams);
-
-        if (key === 'categoria') {
-            if (value && value !== 'Todos') newParams.set(key, value);
-            else newParams.delete(key);
-        } else {
-            if (value) newParams.set(key, value);
-            else newParams.delete(key);
-        }
-
-        // Si cambiamos categoría, talle o color, reseteamos el scroll arriba
+        if (value) newParams.set(key, value);
+        else newParams.delete(key);
+        
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setSearchParams(newParams);
+    };
+
+    // Función maestra para limpiar la URL de talle y color
+    const handleClearFilters = () => {
+        setSearchParams(new URLSearchParams());
     };
 
     // Título dinámico para el H1
@@ -124,37 +133,38 @@ const Products: React.FC = () => {
     }
     return (
         <div className="max-w-360 mx-auto px-6 pb-5 animate-in fade-in duration-500">
-            {/* BARRA SUPERIOR DE CATEGORÍAS Y ORDENAMIENTO */}
+            {/* BARRA SUPERIOR (Usa la navegación real) */}
             <FilterBar 
                 categories={categories}
                 activeCategory={activeCategory}
-                onCategoryChange={(cat) => handleFilterChange('categoria', cat)}
+                onCategoryChange={handleCategoryNavigation}
                 sortBy={sortBy}
                 onSortChange={(val) => setSortBy(val as any)}
             />
             <div className="flex flex-col md:flex-row gap-12 mt-7">
-                {/* SIDEBAR DE FILTROS (IZQUIERDA) */}
+                {/* SIDEBAR DE FILTROS (IZQUIERDA -Solo recibe Talle y Color-) */}
                 <aside className="w-full md:w-64 shrink-0">
                     <FilterSidebar 
-                        activeFilters={{ categorieFilter: activeCategory, sizeFilter, colorFilter }}
+                        activeFilters={{ sizeFilter, colorFilter }}
                         onFilterChange={handleFilterChange}
+                        onClearFilters={handleClearFilters}
                     />
                 </aside>
                 
                 {/* GRILLA DE PRODUCTOS (DERECHA) */}
                 <main className="flex-1">
-                    {/*<div className="mb-8">*/}
+                    <div className="mb-8">
                         <h1 className="text-4xl font-black tracking-tighter uppercase italic italic-pulso">
                             {pageTitle}
                         </h1>
-                    {/*</div>*/}
+                    </div>
 
                     <ProductGrid 
                         products={filteredProducts} 
                         searchTerm={searchTerm}
                         onQuickView={setSelectedQuickView}
                         onClearSearch={() => handleFilterChange('search', null)}
-                        onResetFilters={() => setSearchParams({})}
+                        onResetFilters={handleClearFilters}
                     />
                     
                 </main>
