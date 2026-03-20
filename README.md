@@ -18,7 +18,7 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - `constants/`: Datos estáticos y configuraciones de negocio (MOCK_PRODUCTS, thresholds de envío).
 - `api/`: Configuración de Axios para consumo de datos asíncronos.
 - `styles/`: Sistema de diseño centralizado en globals.css (Tailwind v4 Layering).
-- `pages/`: Vistas principales (Home, Productos) que orquestan los componentes y gestionan la fusión inteligente de datos.
+- `pages/`: Vistas principales (Home, Productos, ProductDetail) que orquestan los componentes y gestionan la fusión inteligente de datos.
 - `context/`: Gestión de estado global (Carrito, Órdenes y centralización de datos del Backend).
 - `components/`: Componentes organizados por responsabilidad (Layout, UI, Cart).
 - `utils/mappers.ts`: Implementación del Adapter Pattern para transformar y normalizar datos crudos de la API en modelos de datos consistentes para la UI.
@@ -49,7 +49,10 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Menú Dinámico (Header):** Conexión de `NavLink.tsx` y el menú de navegación para renderizar las categorías directamente desde la API usando el componente `<Link>` de React Router.
 - [x] **Router Dinámico & Categorías:** Desarrollo de rutas parametrizadas (`/category/:category` y `/offers`) en `App.tsx` con lectura mediante `useParams` para inyectar filtros automáticamente en la vista de Productos.
 - [x] **Navegación SPA Fluida y UX:** Eliminación de recargas de página y aplicación del patrón global de "ScrollToTop" (`useLocation`) para reiniciar la posición del scroll en cada transición de ruta.
+- [x] **Product Detail Page (PDP) & Slugs:** Construcción de la vista individual de producto (`/product/:slug`) con selección dinámica de variantes, validación de stock y fallbacks visuales de data.
+- [x] **Accesibilidad & SEO en Cards (WIP):** Refactorización semántica en las tarjetas de producto (`ProductCard`), aislando la navegación (`<Link>`) de las acciones de modal para habilitar el clic derecho nativo.
 
 ## 🛠️ Próximos Pasos
-- [ ] Product Detail Page (PDP) & Slugs: Creación de la vista individual y detallada de producto basada en su Slug (`/product/:slug`).
+- [ ] Refactorización DRY (Don't Repeat Yourself): Extracción de lógica repetida de mapeo de catálogos hacia un custom hook (`useUnifiedCatalog`) y creación de componentes atómicos para estados de carga/vacíos.
+- [ ] UI/UX Final y Mobile: Pulido de filtros activos (Multi-select) y Drawer/Modal de filtros para la versión móvil.
 - [ ] Persistencia & Checkout: Sincronización con localStorage, diseño del flujo de pago (Checkout) y validación final de órdenes.

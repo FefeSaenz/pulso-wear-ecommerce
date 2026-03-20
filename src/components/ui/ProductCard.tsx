@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Product } from '../../types/product.types';
-import Price from './Price'; // <-- Importamos el componente
+import Price from './Price';
 
 interface ProductCardProps {
   product: Product;
@@ -10,8 +11,15 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  //FUNCIÓN MAESTRA: Frenamos el Link, abrimos el Modal
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAdd(product);
+  };
   return (
-    <div 
+    <Link
+      to={`/product/${product.slug}`}
       className="flex flex-col group cursor-pointer" 
       onClick={() => onAdd(product)}
       onMouseEnter={() => setIsHovered(true)}
@@ -23,13 +31,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
           alt={product.name}
           className="w-full h-full object-cover transition-all duration-700 ease-in-out"
         />
-        {product.promo && (
+        {/*{product.promo && (
           <div className="absolute top-4 left-4 bg-black text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest z-10">
             {product.promo}
           </div>
+        )} */}
+        {/* Manejador de etiquetas (usamos tags según tu interface Product) */}
+        {product.tags && (
+          <div className="absolute top-4 left-4 bg-black text-white px-3 py-1.5 text-[9px] font-black uppercase tracking-[3px] z-10 rounded-sm">
+            {product.tags}
+          </div>
         )}
         <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
-           <span className="bg-white text-black px-6 py-3 text-[11px] font-bold uppercase tracking-wider shadow-xl">Vista Rápida</span>
+           <button 
+            onClick={handleQuickView}
+            className="bg-white text-black px-6 py-3 text-[11px] font-bold uppercase tracking-wider shadow-xl">
+            Vista Rápida
+           </button>
         </div>
       </div>
       <div className="mt-4 text-center">
@@ -37,7 +55,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
                 
         <Price amount={product.price} className="mt-1 text-sm font-bold block" />
       </div>
-    </div>
+    </Link>
   );
 };
 

@@ -10,7 +10,8 @@ import Layout from '@/src/components/layout/Layout';
 
 // Pages
 import Home from '@/src/pages/Home';
-import Products from './pages/Products';
+import Products from '@/src/pages/Products';
+import ProductDetail from '@/src/pages/ProductDetail';
 
 const AppContent: React.FC = () => {
   // Escuchamos en qué ruta estamos
@@ -44,7 +45,8 @@ const AppContent: React.FC = () => {
           element={<Products />}
         />
           
-        
+        {/* Ruta para el detalle del producto */}
+        <Route path="/product/:slug" element={<ProductDetail />} />
 
         {/* Página 404 (Opcional pero recomendado) */}
         <Route 
