@@ -62,9 +62,17 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **UX & Motion**: Integración de transiciones físicas sincronizadas en los paneles laterales (`Drawers`), permitiendo animaciones de entrada/salida fluidas mediante `translate-x y estados de visibilidad`.
 - [x] **Refactorización de Átomos (NavLink)**: Desacoplamiento de estilos fijos en `NavLink.tsx`, permitiendo que el componente sea 100% flexible y se adapte a diferentes contextos de tamaño y peso visual sin conflictos de clases.
 - [x] **Navegación Robusta (Mobile)**: Blindaje del ciclo de navegación en el menú móvil, asegurando el cierre automático del panel y el bloqueo del scroll del body al interactuar con el logo o categorías.
+- [x] **Arquitectura de Datos:** Refactorización profunda de las interfaces `Order` y `CartItem`. Se implementó herencia de tipos (`Omit<Product>`) y se agregó el campo `variant_sku` para garantizar una trazabilidad exacta del stock (talle/color) en el sistema de gestión.
+- [x] **Estructuración de Órdenes para Backend:** Rediseño del objeto de compra para incluir desgloses financieros (`summary`), logística (`shipping`), y datos del cliente preparados para integración con JWT/OAuth, eliminando datos hardcodeados.
+- [x] **Evolución del CheckoutModal:** Creación de un flujo de compra robusto en 3 pasos (Información > Pago > Confirmación) que construye dinámicamente el objeto de la orden basado en el input del usuario.
+- [x] **Validación de Formularios UX/UI:** Reemplazo de las clásicas y molestas alertas de navegador por un sistema de validación visual e inmersiva (estados de error en inputs) que bloquea el avance si faltan campos obligatorios.
+- [x] **Resolución de Reglas de Hooks:** Corrección de la jerarquía de renderizado en React, asegurando que los Hooks (`useState`) se ejecuten correctamente antes de cualquier retorno condicional en los modales.
 
 ## 🛠️ Próximos Pasos
 - [ ] Filtros Mobile: Implementación del Drawer de filtros (siguiendo la estética del MobileMenu) para la página de productos.
 - [ ] Refactorización DRY (Don't Repeat Yourself): Extracción de lógica repetida de mapeo de catálogos hacia un custom hook (`useUnifiedCatalog`) y creación de componentes atómicos para estados de carga/vacíos.
 - [ ] UI/UX Final y Mobile: Pulido de filtros activos (Multi-select) y Drawer/Modal de filtros para la versión móvil.
-- [ ] Persistencia & Checkout: Sincronización con localStorage, diseño del flujo de pago (Checkout) y validación final de órdenes.
+- [ ] **Persistencia del Carrito:** Integrar `localStorage` para que el usuario no pierda los productos seleccionados si recarga o cierra la pestaña accidentalmente.
+- [ ] **Autenticación (Autenticación Google/JWT):** Implementar el login de usuarios para reemplazar el `GUEST_ID` temporal y vincular las órdenes directamente con las cuentas reales de los clientes.
+- [ ] **Integración con Pasarela de Pagos:** Conectar el paso 2 del checkout con la API de Mercado Pago (o similar) para procesar transacciones reales.
+- [ ] **Conexión con Panel de Gestión:** Enviar el objeto `Order` finalizado mediante una petición POST al backend que maneja el panel de control del depósito.
