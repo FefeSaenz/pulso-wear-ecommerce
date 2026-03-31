@@ -144,7 +144,7 @@ const ProductDetail: React.FC = () => {
 
   // 7. RENDERIZADO PRINCIPAL
   return (
-    <div className="max-w-360 mx-auto px-6 py-10 md:py-20 animate-in fade-in duration-500">
+    <div className="max-w-360 mx-auto px-6 py-6 md:py-10 animate-in fade-in duration-500">
       
       {/* BREADCRUMBS */}
       <nav className="flex flex-wrap items-center text-[10px] font-black uppercase tracking-[2px] text-gray-400 mb-6 md:mb-10 gap-y-2">
