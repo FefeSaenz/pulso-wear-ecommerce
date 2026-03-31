@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react'; // <-- Agregamos useState
 import { useSearchParams, useOutletContext, useParams, useNavigate, useLocation } from 'react-router-dom';
 
 // Context & Hooks
@@ -26,6 +26,9 @@ const Products: React.FC = () => {
     const location = useLocation();
     const isOffersRoute = location.pathname === '/offers';
     const navigate = useNavigate();
+
+    // NUEVO: Estado para controlar el Drawer de filtros en Mobile
+    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
     // 1. COMBINACIÓN Y NORMALIZACIÓN DE DATA
     // Juntamos los productos del catálogo con los destacados de la Home
@@ -140,10 +143,13 @@ const Products: React.FC = () => {
                 onCategoryChange={handleCategoryNavigation}
                 sortBy={sortBy}
                 onSortChange={(val) => setSortBy(val as any)}
+                onOpenMobileFilters={() => setIsMobileFiltersOpen(true)} // <-- Conectamos el botón
             />
+
             <div className="flex flex-col md:flex-row gap-12 mt-7">
-                {/* SIDEBAR DE FILTROS (IZQUIERDA -Solo recibe Talle y Color-) */}
-                <aside className="w-full md:w-64 shrink-0">
+                {/* SIDEBAR DE FILTROS (IZQUIERDA - Solo PC) */}
+                {/* NUEVO: Le pusimos hidden md:block para que no moleste en el celu */}
+                <aside className="hidden md:block w-64 shrink-0">
                     <FilterSidebar 
                         activeFilters={{ sizeFilter, colorFilter }}
                         onFilterChange={handleFilterChange}
@@ -167,6 +173,49 @@ const Products: React.FC = () => {
                     />
                 </main>
             </div>
+
+            {/* --- DRAWER DE FILTROS EXCLUSIVO MOBILE --- */}
+            {isMobileFiltersOpen && (
+                <div className="fixed inset-0 z-50 flex md:hidden">
+                    {/* Backdrop / Fondo oscuro */}
+                    <div 
+                        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300" 
+                        onClick={() => setIsMobileFiltersOpen(false)}
+                    />
+                    
+                    {/* Panel lateral estilo brutalista */}
+                    <div className="absolute top-0 left-0 h-full w-4/5 max-w-[300px] bg-white shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
+                        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                            <h2 className="text-xl font-black uppercase tracking-tighter">Filtros</h2>
+                            <button 
+                                onClick={() => setIsMobileFiltersOpen(false)}
+                                className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors"
+                            >
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        
+                        {/* El mismo FilterSidebar que usamos en PC, pero adentro del Drawer */}
+                        <div className="p-6 overflow-y-auto flex-1">
+                            <FilterSidebar 
+                                activeFilters={{ sizeFilter, colorFilter }}
+                                onFilterChange={handleFilterChange}
+                                onClearFilters={handleClearFilters}
+                            />
+                        </div>
+
+                        {/* Botón para aplicar y cerrar */}
+                        <div className="p-6 border-t border-gray-100">
+                            <button 
+                                onClick={() => setIsMobileFiltersOpen(false)}
+                                className="w-full bg-black text-white py-4 text-[11px] font-black uppercase tracking-[4px] active:scale-[0.98] transition-all"
+                            >
+                                Ver Resultados
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

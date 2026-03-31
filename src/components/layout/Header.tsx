@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
   
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 px-5 md:px-5 h-20 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-5 md:px-5 h-20 flex items-center justify-between">
         
         {/* --- 1. BLOQUE IZQUIERDO --- */}
         <div className="flex items-center space-x-5 ">

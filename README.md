@@ -67,11 +67,11 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Evolución del CheckoutModal:** Creación de un flujo de compra robusto en 3 pasos (Información > Pago > Confirmación) que construye dinámicamente el objeto de la orden basado en el input del usuario.
 - [x] **Validación de Formularios UX/UI:** Reemplazo de las clásicas y molestas alertas de navegador por un sistema de validación visual e inmersiva (estados de error en inputs) que bloquea el avance si faltan campos obligatorios.
 - [x] **Resolución de Reglas de Hooks:** Corrección de la jerarquía de renderizado en React, asegurando que los Hooks (`useState`) se ejecuten correctamente antes de cualquier retorno condicional en los modales.
+- [x] **Arquitectura de Interfaz Responsiva (FilterBar):** Refactorización del componente `FilterBar` para aislar la navegación de categorías en Desktop y transformar la vista Mobile en una botonera de comandos rápidos dividida (Filtrar / Ordenar).
+- [x] **Mobile-First UX (Catálogo):** Implementación de un panel lateral (`Drawer`) para los filtros en la versión móvil de la página `Products`. Esto despeja el viewport inicial, permitiendo que el usuario vea la ropa inmediatamente al entrar, mejorando drásticamente la retención.
 
 ## 🛠️ Próximos Pasos
-- [ ] Filtros Mobile: Implementación del Drawer de filtros (siguiendo la estética del MobileMenu) para la página de productos.
-- [ ] Refactorización DRY (Don't Repeat Yourself): Extracción de lógica repetida de mapeo de catálogos hacia un custom hook (`useUnifiedCatalog`) y creación de componentes atómicos para estados de carga/vacíos.
-- [ ] UI/UX Final y Mobile: Pulido de filtros activos (Multi-select) y Drawer/Modal de filtros para la versión móvil.
+- [ ] **Refactorización DRY (Don't Repeat Yourself):** Extracción de lógica repetida de mapeo de catálogos hacia un custom hook (`useUnifiedCatalog`) y creación de componentes atómicos para estados de carga/vacíos.
 - [ ] **Persistencia del Carrito:** Integrar `localStorage` para que el usuario no pierda los productos seleccionados si recarga o cierra la pestaña accidentalmente.
 - [ ] **Autenticación (Autenticación Google/JWT):** Implementar el login de usuarios para reemplazar el `GUEST_ID` temporal y vincular las órdenes directamente con las cuentas reales de los clientes.
 - [ ] **Integración con Pasarela de Pagos:** Conectar el paso 2 del checkout con la API de Mercado Pago (o similar) para procesar transacciones reales.
