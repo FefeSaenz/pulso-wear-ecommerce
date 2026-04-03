@@ -3,7 +3,6 @@ import { useOutletContext, useNavigate } from 'react-router-dom';
 
 // Contexts & Hooks
 import { useApp } from '@/src/context/AppContext'; // Consumo de la API
-import { useProductFilters } from '@/src/hooks/useProductFilters';
 import { Product } from '@/src/types/product.types';
 import { mapApiProductToLocal } from '@/src/utils/mappers';
 
@@ -11,6 +10,7 @@ import { mapApiProductToLocal } from '@/src/utils/mappers';
 import HeroBanner from '@/src/components/ui/HeroBanner';
 import FilterBar from '@/src/components/ui/FilterBar';
 import ProductGrid from '@/src/components/layout/ProductGrid';
+import ProductCarousel from '@/src/components/ui/ProductCarousel';
 import LocationsSection from '@/src/components/layout/LocationsSection';
 
 //Assets
@@ -24,7 +24,7 @@ interface HomeContext {
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
-    const { frontConfig, loading } = useApp(); // Data de la API disponible
+    const { allProducts, frontConfig, loading } = useApp(); // Data de la API disponible
 
     const { setSelectedQuickView } = useOutletContext<HomeContext>();
     
@@ -32,8 +32,16 @@ const Home: React.FC = () => {
     // Transformamos los FeaturedProduct de la API al tipo Product de la UI
     const featuredMapped = useMemo(() => {
         const raw = frontConfig?.featured_products?.products || [];
-        return raw.map(mapApiProductToLocal); // Ahora sí son consistentes
+        // Limitamos a 8 productos para no hacer una Home infinita y obligar al usuario a ir al catálogo
+        return raw.map(mapApiProductToLocal).slice(0, 8);
     }, [frontConfig]);
+
+    // LÓGICA DE OFERTAS PARA EL CARRUSEL ---
+    const offersMapped = useMemo(() => {
+        return allProducts
+          .filter(p => p.discount_percentage && p.discount_percentage > 0)
+          .slice(0, 10); // Máximo 10 ofertas en el carrusel
+    }, [allProducts]);
     
     // LÓGICA DE BANNERS DINÁMICOS CON OVERRIDE LOCAL ---
     const visualBanners = useMemo(() => {
@@ -51,34 +59,25 @@ const Home: React.FC = () => {
         // Si la API no devuelve banners (fallback), creamos la estructura mínima
         return [
             { 
-                id: 'local-1', 
+                id: 'local-1',
+                type: 'hero' as const, 
                 title: 'STREET ESSENTIALS', 
-                subtitle: 'NEW COLLECTION 2026', 
+                subtitle: 'NEW COLLECTION 2026',
+                description: '',
                 image: banner1, 
                 cta: { url: '/productos', text: 'EXPLORAR TIENDA' } 
             },
             { 
-                id: 'local-2', 
-                title: 'PULSO MODE', 
+                id: 'local-2',
+                type: 'hero' as const,
+                title: 'PULSO WEAR', 
                 subtitle: 'DROP EXCLUSIVO', 
+                description: '',
                 image: banner2, 
                 cta: { url: '#', text: 'VER MÁS' } 
             }
         ];
     }, [frontConfig?.banners]);
-    
-    // USO DEL HOOK DE FILTRADO
-    const {
-        filteredProducts,
-        activeCategory,
-        setActiveCategory,
-        sortBy,
-        setSortBy,
-        categories
-    } = useProductFilters({
-        products: featuredMapped, // <--- Aquí estaba el error de nombre
-        searchTerm: ''
-    });
 
     // Manejador de navegación para Banners
     const handleBannerClick = (url: string) => {
@@ -109,19 +108,39 @@ const Home: React.FC = () => {
                 onCtaClick={handleBannerClick}
             />
 
-            <FilterBar 
-                categories={categories} 
-                activeCategory={activeCategory} 
-                onCategoryChange={setActiveCategory} 
-                sortBy={sortBy}
-                onSortChange={(v) => setSortBy(v as any)} 
-            />
+            {/* SECCIÓN DESTACADOS: Separador Brutalista */}
+            <div id="destacados" className="max-w-360 mx-auto px-6 mt-10  flex justify-between items-end border-b-5 pb-1">
+                <h2 className="text-4xl font-black tracking-tighter uppercase italic italic-pulso">
+                    Nuestros Destacados
+                </h2>
+                
+            </div>
 
+            
             <ProductGrid 
-                products={filteredProducts}
+                products={featuredMapped}
                 onQuickView={setSelectedQuickView}  
             />
+            {/* CTA Brutalista hacia la tienda */}
+            <div className="flex justify-center mt-12 mb-8 px-6">
+                <button 
+                    onClick={() => navigate('/productos')}
+                    className="w-full md:w-auto bg-black text-white px-12 py-5 text-[11px] font-black uppercase tracking-[4px] hover:bg-gray-800 transition-colors cursor-pointer active:scale-[0.98]"
+                >
+                    Ver Toda La Colección
+                </button>
+            </div>
 
+            {/* SECCIÓN OFERTAS: Carrusel (Solo se muestra si hay ofertas activas) */}
+            {offersMapped.length > 0 && (
+                <ProductCarousel 
+                    title="Sale!" 
+                    products={offersMapped} 
+                    onAdd={setSelectedQuickView}
+                    viewAllLink="/offers"
+                    viewAllText="Ver Todas Las Ofertas"
+                />
+            )}
             <LocationsSection />
         </div>
     );

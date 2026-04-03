@@ -10,7 +10,7 @@ interface CartContextType {
   setIsProfileOpen: (open: boolean) => void;
   isCheckoutOpen: boolean;
   setIsCheckoutOpen: (open: boolean) => void;
-  addToCart: (product: Product, size: string) => void;
+  addToCart: (item: CartItem) => void;
   updateQuantity: (id: string, size: string, delta: number) => void;
   removeFromCart: (id: string, size: string) => void;
   handleCheckoutComplete: (newOrder: Order) => void;
@@ -33,17 +33,18 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
     MANEJADORES DEL CARRITO
     Usamos useCallback para que las funciones no se recreen si no cambian sus dependencias.
    */
-  const addToCart = useCallback((product: Product, size: string) => {
+  const addToCart = useCallback((newItem: CartItem) => {
     setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id && item.selectedSize === size);
+      const existing = prev.find(
+        (item) => item.id === newItem.id && item.selectedSize === newItem.selectedSize && item.selectedColor === newItem.selectedColor);
       if (existing) {
         return prev.map((item) =>
-          (item.id === product.id && item.selectedSize === size)
+          (item.id === newItem.id && item.selectedSize === newItem.selectedSize && item.selectedColor === newItem.selectedColor)
             ? { ...item, quantity: item.quantity + 1 } 
             : item
         );
       }
-      return [...prev, { ...product, quantity: 1, selectedSize: size }];
+      return [...prev, newItem];
     });
     
     setIsCartOpen(true);

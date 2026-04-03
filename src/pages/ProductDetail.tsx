@@ -90,9 +90,9 @@ const ProductDetail: React.FC = () => {
     
     if (product) {
       // Construimos el objeto respetando tu Omit<Product, 'variants'> + CartItem extras
-      // Usamos as any momentáneamente solo para que el dispatch pase limpio hacia tu CartContext
+      
       const cartItem = {
-        id: product.id, // Omitimos variantes, mandamos el ID base
+        id: product.id,
         slug: product.slug,
         name: product.name,
         description: product.description,
@@ -114,7 +114,7 @@ const ProductDetail: React.FC = () => {
         selectedImage: mainImage || (product.images.length > 0 ? product.images[0] : '')
       };
 
-      addToCart(cartItem as any); 
+      addToCart(cartItem); 
       setError('');
       // OPCIONAL: Acá podrías disparar la apertura del CartDrawer
       // onOpenCart(); si lo tuvieras disponible mediante contexto o prop.

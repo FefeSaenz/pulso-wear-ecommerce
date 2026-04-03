@@ -55,8 +55,8 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
       `}</style>
       
       {/* Contenedor del título (Respeta los márgenes estándar) */}
-      <div className="max-w-360 mx-auto mb-8 flex items-center justify-between">
-        <h2 className="text-xl md:text-3xl font-black italic-pulso uppercase tracking-tighter">
+      <div className="max-w-360 mx-auto px-6  flex justify-between items-end border-b-5 pb-1">
+        <h2 className="text-4xl font-black tracking-tighter uppercase italic italic-pulso">
           {title}
         </h2>
         {viewAllLink && (
@@ -69,7 +69,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
       </div>
 
       {/* Contenedor de las tarjetas (Full Bleed en Mobile) */}
-      <div className="max-w-360 mx-auto relative group/carousel">
+      <div className="max-w-360 py-5 mt-4  mx-auto relative group/carousel">
         
         {/* FLECHAS LATERALES (Exclusivas de Desktop, escuchan solo al group/carousel) */}
         <button 

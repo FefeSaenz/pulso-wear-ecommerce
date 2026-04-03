@@ -8,16 +8,18 @@ interface ProductGridProps {
   searchTerm?: string;
   onClearSearch?: () => void;
   onQuickView: (product: Product) => void;
+  quantityLabel?: boolean; // Etiqueta dinámica para la cantidad de productos encontrados
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({ 
   products, 
   searchTerm = '', 
   onClearSearch, 
-  onQuickView
+  onQuickView,
+  quantityLabel = true
 }) => {
   return (
-    <section className="px-6 py-5">
+    <section className=" py-5">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-12">
           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">

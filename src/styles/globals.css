@@ -1,6 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Importamos Teko para los títulos brutalistas */
+@import url('https://fonts.googleapis.com/css2?family=Teko:wght@600;700&display=swap');
+/* 1. Importamos las nuevas fuentes en src/styles/globals.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Syne:wght@400;800&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --font-teko: 'Teko', sans-serif;
+  --font-archivo: 'Archivo Black', sans-serif;
+  --font-syne: 'Syne', sans-serif;
+}
 @layer base {
   body {
     font-family: 'Inter', sans-serif;

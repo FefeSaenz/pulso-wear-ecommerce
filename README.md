@@ -69,6 +69,11 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Resolución de Reglas de Hooks:** Corrección de la jerarquía de renderizado en React, asegurando que los Hooks (`useState`) se ejecuten correctamente antes de cualquier retorno condicional en los modales.
 - [x] **Arquitectura de Interfaz Responsiva (FilterBar):** Refactorización del componente `FilterBar` para aislar la navegación de categorías en Desktop y transformar la vista Mobile en una botonera de comandos rápidos dividida (Filtrar / Ordenar).
 - [x] **Mobile-First UX (Catálogo):** Implementación de un panel lateral (`Drawer`) para los filtros en la versión móvil de la página `Products`. Esto despeja el viewport inicial, permitiendo que el usuario vea la ropa inmediatamente al entrar, mejorando drásticamente la retención.
+- [x] **Rediseño Editorial (Home):** Transformación de la vista principal hacia una estética streetwear. Eliminación del `FilterBar` para priorizar una vidriera curada y limpia, integrando el `ProductCarousel` dinámico para ofertas.
+- [x] **Jerarquía Visual:** Creación e integración de `nuevos separadores` de sección ("Nuestros Destacados", "Nuestro Local") para organizar el contenido de la Home y guiar la lectura del usuario.
+- [x] **Blindaje Type-Safe (Cart Context):** Refactorización estricta de la lógica de negocio del carrito. El sistema ahora evalúa la combinación exacta de Producto, Talle y Color para decidir inteligentemente si suma cantidades o genera filas independientes, vital para el control logístico.
+- [x] **Const Assertions (TypeScript):** Uso de tipado literal estricto (as const) en el mapeo de datos locales (Banners) para garantizar la inmutabilidad, asegurar compatibilidad total con las interfaces de la API y prevenir silenciamiento de errores.
+- [x] **Refinamiento de UI (ProductCarousel):** Implementación de la técnica "Boxed/Framed" limpiando márgenes redundantes y permitiendo que el carrusel respete la grilla principal, logrando una cohesión visual.
 
 ## 🛠️ Próximos Pasos
 - [ ] **Refactorización DRY (Don't Repeat Yourself):** Extracción de lógica repetida de mapeo de catálogos hacia un custom hook (`useUnifiedCatalog`) y creación de componentes atómicos para estados de carga/vacíos.
