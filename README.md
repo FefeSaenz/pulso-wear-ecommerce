@@ -24,7 +24,10 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - `utils/mappers.ts`: Implementación del Adapter Pattern para transformar y normalizar datos crudos de la API en modelos de datos consistentes para la UI.
 - `hooks/`: Lógica de negocio reutilizable y encapsulada (Custom Hooks) para el manejo de filtros y estados complejos.
 - `MobileMenu/ (Pattern)`: Componente de navegación de pantalla completa aislado del Header para optimizar el rendimiento y la mantenibilidad de la UI móvil.
-- `UI/ (Atomics)`: Evolución del átomo NavLink para soportar comportamientos polimórficos (Desktop con submenús vs Mobile brutalista).
+- `UI/ (Atomics)`: Evolución del átomo NavLink para soportar comportamientos polimórficos y creación del componente SectionTitle, un átomo de diseño modular que estandariza la jerarquía visual de los títulos de sección con soporte para líneas Full-Bleed.
+- `Grid System (Pattern)`: Implementación de una Grilla Unificada de 1440px (max-w-360) con paddings constantes (px-6), asegurando una alineación matemática perfecta (plomada visual) entre componentes de diferentes niveles (Header, Grillas, Carruseles, Secciones y Footer).
+
+
 
 ## ✅ Logros y Avances
 - [x] **Estado Global:** Migración exitosa a Context API para desacoplar la lógica del carrito de la UI.
@@ -74,8 +77,14 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Blindaje Type-Safe (Cart Context):** Refactorización estricta de la lógica de negocio del carrito. El sistema ahora evalúa la combinación exacta de Producto, Talle y Color para decidir inteligentemente si suma cantidades o genera filas independientes, vital para el control logístico.
 - [x] **Const Assertions (TypeScript):** Uso de tipado literal estricto (as const) en el mapeo de datos locales (Banners) para garantizar la inmutabilidad, asegurar compatibilidad total con las interfaces de la API y prevenir silenciamiento de errores.
 - [x] **Refinamiento de UI (ProductCarousel):** Implementación de la técnica "Boxed/Framed" limpiando márgenes redundantes y permitiendo que el carrusel respete la grilla principal, logrando una cohesión visual.
+- [x] **Refactorización de Grilla y Alineación:** Reestructuración de `ProductGrid, Carousel y LocationsSection` para responder a una grilla unificada de 1440px, eliminando desajustes en resoluciones 4K.
+- [x] **Sistema de Diseño SectionTitle:** Creación e implementación de un componente global de títulos `SectionTitle` con estética streetwear y soporte full-bleed para las secciones "DROPS", "SALE!" y "STORE".
+- [x] **Rediseño Integral de Footer:** Nueva arquitectura editorial de tres niveles que integra activos de alta resolución (Logo/Slogan), newsletter y validación visual.
+- [x] **Optimización de UX y Copywriting:** Implementación de términos minimalistas para mejorar la legibilidad móvil y ajuste fino de los gaps globales para un ritmo de scroll más fluido.
+- [x] **Firma y Limpieza de Deuda:** Inclusión de créditos profesionales ("Developed by Innovación Digital") y limpieza de lógica redundante en el maquetado de LocationsSection.
 
 ## 🛠️ Próximos Pasos
+- [ ] **Unificación Tipográfica (Catálogo):** Refactorizar la página de /productos para eliminar fuentes itálicas residuales y alinear el H1 al nuevo sistema de diseño extendido.
 - [ ] **Refactorización DRY (Don't Repeat Yourself):** Extracción de lógica repetida de mapeo de catálogos hacia un custom hook (`useUnifiedCatalog`) y creación de componentes atómicos para estados de carga/vacíos.
 - [ ] **Persistencia del Carrito:** Integrar `localStorage` para que el usuario no pierda los productos seleccionados si recarga o cierra la pestaña accidentalmente.
 - [ ] **Autenticación (Autenticación Google/JWT):** Implementar el login de usuarios para reemplazar el `GUEST_ID` temporal y vincular las órdenes directamente con las cuentas reales de los clientes.

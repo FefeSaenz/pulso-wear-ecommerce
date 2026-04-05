@@ -184,7 +184,7 @@ const Products: React.FC = () => {
                     />
                     
                     {/* Panel lateral estilo brutalista */}
-                    <div className="absolute top-0 left-0 h-full w-4/5 max-w-[300px] bg-white shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
+                    <div className="absolute top-0 left-0 h-full w-4/5 max-w-75 bg-white shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
                         <div className="flex items-center justify-between p-6 border-b border-gray-100">
                             <h2 className="text-xl font-black uppercase tracking-tighter">Filtros</h2>
                             <button 

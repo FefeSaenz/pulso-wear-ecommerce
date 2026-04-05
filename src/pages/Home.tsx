@@ -102,35 +102,21 @@ const Home: React.FC = () => {
     }
 
     return (
-        <div className="animate-in fade-in duration-700">
+        <div className="animate-in fade-in duration-700 flex flex-col gap-10 pb-16">
             <HeroBanner
                 banners={visualBanners}
                 onCtaClick={handleBannerClick}
             />
 
-            {/* SECCIÓN DESTACADOS: Separador Brutalista */}
-            <div id="destacados" className="max-w-360 mx-auto px-6 mt-10  flex justify-between items-end border-b-5 pb-1">
-                <h2 className="text-4xl font-black tracking-tighter uppercase italic italic-pulso">
-                    Nuestros Destacados
-                </h2>
-                
-            </div>
-
-            
             <ProductGrid 
+                title='Drops'
                 products={featuredMapped}
-                onQuickView={setSelectedQuickView}  
+                onQuickView={setSelectedQuickView}
+                quantityLabel={false}
+                viewAllLink="/productos"
+                viewAllText="Ver Toda La Colección"
             />
-            {/* CTA Brutalista hacia la tienda */}
-            <div className="flex justify-center mt-12 mb-8 px-6">
-                <button 
-                    onClick={() => navigate('/productos')}
-                    className="w-full md:w-auto bg-black text-white px-12 py-5 text-[11px] font-black uppercase tracking-[4px] hover:bg-gray-800 transition-colors cursor-pointer active:scale-[0.98]"
-                >
-                    Ver Toda La Colección
-                </button>
-            </div>
-
+            
             {/* SECCIÓN OFERTAS: Carrusel (Solo se muestra si hay ofertas activas) */}
             {offersMapped.length > 0 && (
                 <ProductCarousel 

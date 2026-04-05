@@ -1,10 +1,11 @@
 import React from 'react';
+import SectionTitle from '@/src/components/ui/SectionTitle';
 
 const LOCATIONS = [
   {
     name: 'PULSO Paraná',
     address: 'Buenos Aires 60 - Paseo de las luces, Paraná, Entre Ríos',
-    hours: 'Lun - Sáb: 10:00 - 20:00',
+    hours: 'Lun - Sáb: 17:00 - 20:00',
     phone: '+54 343 4234 567',
     googleMapsLink: 'https://www.google.com/maps/search/?api=1&query=Buenos+Aires+60+Parana+Entre+Rios'
   }
@@ -12,13 +13,9 @@ const LOCATIONS = [
 
 const LocationsSection: React.FC = () => {
   return (
-    <section id="locals-section" className="py-24 px-6 md:px-12 bg-white">
-      <div className="max-w-7xl mx-auto">
-        <div className="max-w-360 mx-auto px-6  flex justify-between items-end border-b-5 pb-1">
-          <h2 className="text-6xl md:text-4xl font-syne font-bold uppercase tracking-normal leading-none mt-1">Nuestro Local</h2>
-          <div className="w-12 h-1 bg-black mx-auto"></div>
-        </div>
-
+    <section id="locals-section" className="w-full bg-white">
+      <SectionTitle title="Store" />
+      <div className="max-w-360 mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-12 order-2 lg:order-1">
             {LOCATIONS.map((loc, idx) => (

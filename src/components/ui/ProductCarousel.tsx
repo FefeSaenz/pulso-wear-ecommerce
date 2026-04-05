@@ -1,6 +1,8 @@
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from './ProductCard';
+import SectionTitle from './SectionTitle';
+
 import { Product } from '@/src/types/product.types';
 
 interface ProductCarouselProps {
@@ -48,29 +50,21 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
   return (
     // Agregamos un contenedor principal que puede ocupar todo el ancho
-    <div className="w-full py-8 border-t border-gray-100 mt-5 md:mt-10">
+    <section className="w-full">
       <style>{`
         .no-scroll-view::-webkit-scrollbar { display: none; }
         .no-scroll-view { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
-      
-      {/* Contenedor del título (Respeta los márgenes estándar) */}
-      <div className="max-w-360 mx-auto px-6  flex justify-between items-end border-b-5 pb-1">
-        <h2 className="text-4xl font-black tracking-tighter uppercase italic italic-pulso">
-          {title}
-        </h2>
-        {viewAllLink && (
-          <Link
-            to={viewAllLink}
-            className="text-[10px] font-black uppercase tracking-[2px] text-gray-400 hover:text-black transition-colors hidden md:block cursor-pointer">
-            {viewAllText}
-          </Link>
-        )}
-      </div>
+
+      {/* Usamos el componente reutilizable */}
+      <SectionTitle 
+        title={title} 
+        viewAllLink={viewAllLink} 
+        viewAllText={viewAllText} 
+      />
 
       {/* Contenedor de las tarjetas (Full Bleed en Mobile) */}
-      <div className="max-w-360 py-5 mt-4  mx-auto relative group/carousel">
-        
+      <div className="max-w-360 py-5 mt-4 mx-auto relative group/carousel">
         {/* FLECHAS LATERALES (Exclusivas de Desktop, escuchan solo al group/carousel) */}
         <button 
           onClick={() => scroll('left')}
@@ -104,19 +98,23 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
           ))}
           
           {/* Tarjeta final opcional ("Ver más") para darle un cierre elegante en mobile */}
-          <div className="snap-start shrink-0 w-[50%] md:hidden flex items-center justify-center">
+          <div className="snap-start shrink-0 w-[45%] md:hidden flex">
             <Link 
               to={viewAllLink}
-              className="text-center p-6 border border-dashed border-gray-300 rounded-sm w-full h-[70%] flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-black hover:border-black transition-colors"
+              className="flex-1 flex flex-col items-center justify-center gap-4 bg-gray-50 transition-colors text-black rounded-sm p-4 group"
             >
-              <i className="fa-solid fa-arrow-right text-2xl"></i>
-              <span className="text-[10px] font-black uppercase tracking-widest">{viewAllText}</span>
+              <div className="w-12 h-12 rounded-full border border-gray-200 group-active:border-black group-active:text-white flex items-center justify-center transition-none cursor-pointer">
+                <i className="fa-solid fa-arrow-right text-lg"></i>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[2px] text-center leading-relaxed">
+                {viewAllText}
+              </span>
             </Link>
           </div>
 
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
