@@ -145,233 +145,237 @@ const ProductDetail: React.FC = () => {
 
   // 7. RENDERIZADO PRINCIPAL
   return (
-    <div className="max-w-360 mx-auto px-6 py-6 md:py-10 animate-in fade-in duration-500">
-      
-      {/* BREADCRUMBS */}
-      <Breadcrumbs 
-        items={[
-          { label: product.category, href: `/category/${product.category.toLowerCase()}` },
-          { label: product.name } // Sin href porque es el actual
-        ]} 
-      />
-
-      <div className="flex flex-col md:flex-row gap-12 lg:gap-20 ">
+    // Envolvemos todo en un Fragment para poder poner el Carousel AFUERA del contenedor constreñido
+    <>
+      <div className="max-w-360 mx-auto px-6 py-6 md:py-10 animate-in fade-in duration-500">
         
-        {/* GALERÍA DE IMÁGENES (Responsiva) */}
-        <div className="w-full md:w-1/2 flex flex-col md:flex-row gap-4 md:gap-6">
+        {/* BREADCRUMBS */}
+        <Breadcrumbs 
+          items={[
+            { label: product.category, href: `/category/${product.category.toLowerCase()}` },
+            { label: product.name } // Sin href porque es el actual
+          ]} 
+        />
+
+        <div className="flex flex-col md:flex-row gap-12 lg:gap-20 ">
           
-          {/* Miniaturas (Desktop: Izquierda Vertical / Mobile: Abajo Horizontal) */}
-          {product.images && product.images.length > 1 && (
-            <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto no-scrollbar order-2 md:order-1 w-full md:w-20 lg:w-24 shrink-0 pb-2 md:pb-0">
-              {product.images.map((img: string, idx: number) => (
-                <button 
-                  key={idx} 
-                  onClick={() => setMainImage(img)}
-                  className={`w-20 md:w-full aspect-4/5 shrink-0 transition-all cursor-pointer rounded-sm flex group overflow-hidden ${
-                    mainImage === img 
-                      ? 'z-10 p-0 border-0 outline-none appearance-none' 
-                      : 'hover:opacity-80 p-0 border-0 outline-none appearance-none bg-transparent'
-                  }`}
-                >
-                  <img 
-                    src={img} 
-                    alt={`${product.name} thumbnail ${idx + 1}`} 
-                    className="block w-full h-full object-cover rounded-sm transition-transform duration-300 scale-[1.01] group-hover:scale-105" 
-                  />
-                </button>
-              ))}
-            </div> 
-          )}
-
-          {/* Imagen Principal */}
-          <div className="flex-1 order-1 md:order-2 aspect-4/5 bg-gray-50 rounded-sm overflow-hidden relative group flex">
-            {/* NUEVO: ETIQUETA DE OFERTA SUPERPUESTA (Z-20 para estar sobre la imagen) */}
-            {(product.discount_percentage || (product.original_price && product.original_price > product.price)) ? (
-              <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[3px] z-20 rounded-sm pointer-events-none shadow-md">
-                {product.discount_percentage ? `-${product.discount_percentage}%` : 'Oferta'}
-              </div>
-            ) : null}
-            {mainImage ? (
-              <img 
-                src={mainImage} 
-                alt={product.name} 
-                className="w-full h-full object-cover object-center scale-[1.01] group-hover:scale-[1.03] transition-transform duration-700 block"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs font-bold uppercase tracking-widest">
-                Sin Imagen
-              </div>
-            )}
-          </div>
-          
-        </div>
-
-        {/* INFO Y COMPRA */}
-        <div className="w-full md:w-1/2 flex flex-col">
-          {/* Etiqueta / Tag */}
-          {product.tags && (
-            <span className="inline-block bg-black text-white text-[9px] font-black uppercase tracking-[3px] px-3 py-1.5 w-max mb-6 rounded-sm">
-              {Array.isArray(product.tags) ? product.tags[0] : product.tags}
-            </span>
-          )}
-
-          {/* Título */}
-          <h1 className="text-3xl md:text-5xl font-black italic-pulso uppercase tracking-tighter mb-2 leading-none">
-            {product.name}
-          </h1>
-
-          {/* SKU y Rating */}
-          <div className="flex flex-wrap items-center gap-4 mb-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-            {product.base_sku && <span>SKU: {product.base_sku}</span>}
+          {/* GALERÍA DE IMÁGENES (Responsiva) */}
+          <div className="w-full md:w-1/2 flex flex-col md:flex-row gap-4 md:gap-6">
             
-            {/* RATING:
-            {product.rating && (
-              <span className="flex items-center gap-1 text-black">
-                ★ {product.rating} <span className="text-gray-400">({product.reviews_count || 0})</span>
-              </span>
-            )}*/}
-          </div>
-
-          {/* Precio */}
-          <div className="mb-8 flex items-center gap-4">
-             <Price amount={product.price} className="text-2xl font-bold" />
-             {product.original_price && (
-               <span className="text-lg text-gray-400 line-through">${product.original_price.toLocaleString('es-AR')}</span>
-             )}
-          </div>
-
-          {/* Selector de Color */}
-          {availableColors.length > 0 && (
-            <div className="mb-8 border-b border-gray-100 pb-8">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-500">Color</span>
-                <span className="text-[10px] font-black uppercase tracking-[2px] text-black bg-gray-50 px-3 py-1 rounded-full">{selectedColor}</span>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {availableColors.map(color => (
-                  <button
-                    key={color}
-                    onClick={() => {
-                      setSelectedColor(color);
-                      setSelectedSize(null);
-                      setError('');
-                      
-                      const variant = product.variants.find(v => v.color.name === color);
-                      if (variant?.color.image) {
-                        setMainImage(variant.color.image);
-                      }
-                    }}
-                    className={`px-4 py-2 border rounded-sm text-[10px] font-bold uppercase transition-all whitespace-nowrap cursor-pointer ${
-                      selectedColor === color ? 'border-black bg-black text-white' : 'border-gray-200 bg-white hover:border-black text-gray-600'
+            {/* Miniaturas (Desktop: Izquierda Vertical / Mobile: Abajo Horizontal) */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto no-scrollbar order-2 md:order-1 w-full md:w-20 lg:w-24 shrink-0 pb-2 md:pb-0">
+                {product.images.map((img: string, idx: number) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => setMainImage(img)}
+                    className={`w-20 md:w-full aspect-4/5 shrink-0 transition-all cursor-pointer rounded-sm flex group overflow-hidden ${
+                      mainImage === img 
+                        ? 'z-10 p-0 border-0 outline-none appearance-none' 
+                        : 'hover:opacity-80 p-0 border-0 outline-none appearance-none bg-transparent'
                     }`}
                   >
-                    {color}
+                    <img 
+                      src={img} 
+                      alt={`${product.name} thumbnail ${idx + 1}`} 
+                      className="block w-full h-full object-cover rounded-sm transition-transform duration-300 scale-[1.01] group-hover:scale-105" 
+                    />
                   </button>
                 ))}
-              </div>
-            </div>
-          )}
+              </div> 
+            )}
 
-          {/* Selector de Talles */}
-          {availableSizes.length > 0 && (
-            <div className="mb-10">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-500">Talle</span>
-                <button className="text-[9px] font-black uppercase tracking-[2px] text-gray-400 underline hover:text-black cursor-pointer">Guía de talles</button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {availableSizes.map(size => (
-                  <button
-                    key={size}
-                    onClick={() => {
-                      setSelectedSize(size);
-                      setError('');
-                    }}
-                    className={`w-12 h-12 border flex items-center justify-center text-[11px] font-bold transition-all cursor-pointer rounded-sm ${
-                      selectedSize === size ? 'bg-black text-white border-black ring-1 ring-black ring-offset-1' : 'bg-white border-gray-200 hover:border-black text-gray-800'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-              
-              {/* Error Message */}
-              {error && (
-                <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-4 animate-pulse">
-                  {error}
-                </p>
+            {/* Imagen Principal */}
+            <div className="flex-1 order-1 md:order-2 aspect-4/5 bg-gray-50 rounded-sm overflow-hidden relative group flex">
+              {/* NUEVO: ETIQUETA DE OFERTA SUPERPUESTA (Z-20 para estar sobre la imagen) */}
+              {(product.discount_percentage || (product.original_price && product.original_price > product.price)) ? (
+                <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[3px] z-20 rounded-sm pointer-events-none shadow-md">
+                  {product.discount_percentage ? `-${product.discount_percentage}%` : 'Oferta'}
+                </div>
+              ) : null}
+              {mainImage ? (
+                <img 
+                  src={mainImage} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover object-center scale-[1.01] group-hover:scale-[1.03] transition-transform duration-700 block"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs font-bold uppercase tracking-widest">
+                  Sin Imagen
+                </div>
               )}
             </div>
-          )}
-
-          {/* Add to Cart Button */}
-          <button 
-            onClick={handleAddToCart}
-            className="w-full bg-black text-white py-5 text-xs font-black uppercase tracking-[4px] hover:bg-gray-900 transition-colors active:scale-[0.99] mb-8 cursor-pointer rounded-sm"
-          >
-            Agregar al Carrito
-          </button>
-
-          {/* Description y Detalles (Type-Safe) */}
-          <div className="border-t border-gray-100 pt-8 mt-4 space-y-8">
-            <div>
-              <h3 className="text-[10px] font-black uppercase tracking-[2px] text-black mb-4">Descripción</h3>
-              <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">
-                {product.description || 'Prenda premium diseñada para el uso urbano diario. Ofrece la combinación ideal entre confort duradero y cortes contemporáneos.'}
-              </p>
-            </div>
             
-            {/* Solo renderiza si hay subcategoría, categoría o género */}
-            {(product.brand || product.material || product.category || product.subcategory || product.gender) && (
-              <div>
-                <h3 className="text-[10px] font-black uppercase tracking-[2px] text-black mb-4">Detalles</h3>
-                <ul className="text-sm text-gray-500 space-y-2">
-                  {product.brand && (
-                    <li className="flex items-start">
-                      <span className="font-bold text-gray-800 min-w-20">Marca:</span> 
-                      <span>{product.brand}</span>
-                    </li>
-                  )}
-                  {product.material && (
-                    <li className="flex items-start">
-                      <span className="font-bold text-gray-800 min-w-20">Material:</span> 
-                      <span>{product.material}</span>
-                    </li>
-                  )}
-                  {product.category && (
-                    <li className="flex items-start">
-                      <span className="font-bold text-gray-800 min-w-20">Categoría:</span> 
-                      <span className="capitalize">{product.category}</span>
-                    </li>
-                  )}
-                  {product.subcategory && (
-                    <li className="flex items-start">
-                      <span className="font-bold text-gray-800 min-w-20">Estilo:</span> 
-                      <span className="capitalize">{product.subcategory}</span>
-                    </li>
-                  )}
-                  {product.gender && (
-                    <li className="flex items-start">
-                      <span className="font-bold text-gray-800 min-w-20">Género:</span> 
-                      <span className="capitalize">{product.gender}</span>
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
           </div>
 
+          {/* INFO Y COMPRA */}
+          <div className="w-full md:w-1/2 flex flex-col">
+            {/* Etiqueta / Tag */}
+            {product.tags && (
+              <span className="inline-block bg-black text-white text-[9px] font-black uppercase tracking-[3px] px-3 py-1.5 w-max mb-6 rounded-sm">
+                {Array.isArray(product.tags) ? product.tags[0] : product.tags}
+              </span>
+            )}
+
+            {/* Título */}
+            <h1 className="text-3xl md:text-5xl font-black italic-pulso uppercase tracking-tighter mb-2 leading-none">
+              {product.name}
+            </h1>
+
+            {/* SKU y Rating */}
+            <div className="flex flex-wrap items-center gap-4 mb-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              {product.base_sku && <span>SKU: {product.base_sku}</span>}
+              
+              {/* RATING:
+              {product.rating && (
+                <span className="flex items-center gap-1 text-black">
+                  ★ {product.rating} <span className="text-gray-400">({product.reviews_count || 0})</span>
+                </span>
+              )}*/}
+            </div>
+
+            {/* Precio */}
+            <div className="mb-8 flex items-center gap-4">
+                <Price amount={product.price} className="text-2xl font-bold" />
+                {product.original_price && (
+                  <span className="text-lg text-gray-400 line-through">${product.original_price.toLocaleString('es-AR')}</span>
+                )}
+            </div>
+
+            {/* Selector de Color */}
+            {availableColors.length > 0 && (
+              <div className="mb-8 border-b border-gray-100 pb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-500">Color</span>
+                  <span className="text-[10px] font-black uppercase tracking-[2px] text-black bg-gray-50 px-3 py-1 rounded-full">{selectedColor}</span>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {availableColors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        setSelectedColor(color);
+                        setSelectedSize(null);
+                        setError('');
+                        
+                        const variant = product.variants.find(v => v.color.name === color);
+                        if (variant?.color.image) {
+                          setMainImage(variant.color.image);
+                        }
+                      }}
+                      className={`px-4 py-2 border rounded-sm text-[10px] font-bold uppercase transition-all whitespace-nowrap cursor-pointer ${
+                        selectedColor === color ? 'border-black bg-black text-white' : 'border-gray-200 bg-white hover:border-black text-gray-600'
+                      }`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Selector de Talles */}
+            {availableSizes.length > 0 && (
+              <div className="mb-10">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-500">Talle</span>
+                  <button className="text-[9px] font-black uppercase tracking-[2px] text-gray-400 underline hover:text-black cursor-pointer">Guía de talles</button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {availableSizes.map(size => (
+                    <button
+                      key={size}
+                      onClick={() => {
+                        setSelectedSize(size);
+                        setError('');
+                      }}
+                      className={`w-12 h-12 border flex items-center justify-center text-[11px] font-bold transition-all cursor-pointer rounded-sm ${
+                        selectedSize === size ? 'bg-black text-white border-black ring-1 ring-black ring-offset-1' : 'bg-white border-gray-200 hover:border-black text-gray-800'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Error Message */}
+                {error && (
+                  <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-4 animate-pulse">
+                    {error}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Add to Cart Button */}
+            <button 
+              onClick={handleAddToCart}
+              className="w-full bg-black text-white py-5 text-xs font-black uppercase tracking-[4px] hover:bg-gray-900 transition-colors active:scale-[0.99] mb-8 cursor-pointer rounded-sm"
+            >
+              Agregar al Carrito
+            </button>
+
+            {/* Description y Detalles (Type-Safe) */}
+            <div className="border-t border-gray-100 pt-8 mt-4 space-y-8">
+              <div>
+                <h3 className="text-[10px] font-black uppercase tracking-[2px] text-black mb-4">Descripción</h3>
+                <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">
+                  {product.description || 'Prenda premium diseñada para el uso urbano diario. Ofrece la combinación ideal entre confort duradero y cortes contemporáneos.'}
+                </p>
+              </div>
+              
+              {/* Solo renderiza si hay subcategoría, categoría o género */}
+              {(product.brand || product.material || product.category || product.subcategory || product.gender) && (
+                <div>
+                  <h3 className="text-[10px] font-black uppercase tracking-[2px] text-black mb-4">Detalles</h3>
+                  <ul className="text-sm text-gray-500 space-y-2">
+                    {product.brand && (
+                      <li className="flex items-start">
+                        <span className="font-bold text-gray-800 min-w-20">Marca:</span> 
+                        <span>{product.brand}</span>
+                      </li>
+                    )}
+                    {product.material && (
+                      <li className="flex items-start">
+                        <span className="font-bold text-gray-800 min-w-20">Material:</span> 
+                        <span>{product.material}</span>
+                      </li>
+                    )}
+                    {product.category && (
+                      <li className="flex items-start">
+                        <span className="font-bold text-gray-800 min-w-20">Categoría:</span> 
+                        <span className="capitalize">{product.category}</span>
+                      </li>
+                    )}
+                    {product.subcategory && (
+                      <li className="flex items-start">
+                        <span className="font-bold text-gray-800 min-w-20">Estilo:</span> 
+                        <span className="capitalize">{product.subcategory}</span>
+                      </li>
+                    )}
+                    {product.gender && (
+                      <li className="flex items-start">
+                        <span className="font-bold text-gray-800 min-w-20">Género:</span> 
+                        <span className="capitalize">{product.gender}</span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
       </div>
-      {/* NUEVO: CARRUSEL DE PRODUCTOS RELACIONADOS */}
-      {/* Filtramos para no mostrar el producto que el usuario ya está viendo */}
+
+      {/* AHORA EL CARRUSEL ESTÁ LIBRE. No está afectado por el max-w-360 ni los px-6 del div de arriba */}
       <ProductCarousel 
-        title="Lo más buscado" 
+        title="Trends"
+        variant='slim'
         products={allProducts.filter(p => p.id !== product.id).slice(0, 8)} 
         onAdd={setSelectedQuickView}
       />
-    </div>
+    </>
   );
 };
 

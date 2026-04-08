@@ -11,6 +11,7 @@ interface ProductCarouselProps {
   onAdd: (product: Product) => void;
   viewAllLink?: string; // Ruta dinámica
   viewAllText?: string; // Texto dinámico
+  variant?: 'default' | 'slim';
 }
 
 const ProductCarousel: React.FC<ProductCarouselProps> = ({ 
@@ -18,7 +19,8 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
   products, 
   onAdd,
   viewAllLink = '/productos', 
-  viewAllText = 'Ver Todo'
+  viewAllText = 'Ver Todo',
+  variant = 'default'
 }) => {
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -61,6 +63,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
         title={title} 
         viewAllLink={viewAllLink} 
         viewAllText={viewAllText} 
+        variant={variant}
       />
 
       {/* Contenedor de las tarjetas (Full Bleed en Mobile) */}
@@ -80,18 +83,14 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
         </button>
 
         {/* CONTENEDOR DEL CARRUSEL */}
-        {/* El padding-left en mobile (pl-6) alinea el primer elemento con el título. */}
-        {/* El padding-right (pr-6) asegura que el último elemento no pegue contra el borde si scrolleas a tope. */}
         <div 
           ref={carouselRef}
-          className="flex overflow-x-auto gap-4 md:gap-6 snap-x snap-mandatory scroll-smooth pb-4 no-scroll-view pl-6 pr-6 md:px-6"
+          className="flex overflow-x-auto gap-4 md:gap-6 snap-x snap-mandatory scroll-smooth  no-scroll-view px-6 scroll-pl-6"
         >
           {products.map((product, idx) => (
             <div 
               key={`${product.id}-${idx}`} 
-              // En mobile (w-[75%]), la tarjeta ocupa 3/4 de pantalla. Como el gap y los márgenes hacen lo suyo, 
-              // el usuario verá claramente el borde de la siguiente tarjeta asomando a la derecha.
-              className="snap-start shrink-0 w-[75%] md:w-[45%] lg:w-[23%]"
+              className="snap-start shrink-0 w-[75vw] md:w-[45%] lg:w-[23%]"
             >
               <ProductCard product={product} onAdd={onAdd} />
             </div>
@@ -103,7 +102,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
               to={viewAllLink}
               className="flex-1 flex flex-col items-center justify-center gap-4 bg-gray-50 transition-colors text-black rounded-sm p-4 group"
             >
-              <div className="w-12 h-12 rounded-full border border-gray-200 group-active:border-black group-active:text-white flex items-center justify-center transition-none cursor-pointer">
+              <div className="w-12 h-12 rounded-full border border-gray-200 group-active:border-black flex items-center justify-center transition-none cursor-pointer">
                 <i className="fa-solid fa-arrow-right text-lg"></i>
               </div>
               <span className="text-[10px] font-black uppercase tracking-[2px] text-center leading-relaxed">

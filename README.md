@@ -26,7 +26,7 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - `MobileMenu/ (Pattern)`: Componente de navegación de pantalla completa aislado del Header para optimizar el rendimiento y la mantenibilidad de la UI móvil.
 - `UI/ (Atomics)`: Evolución del átomo NavLink para soportar comportamientos polimórficos y creación del componente SectionTitle, un átomo de diseño modular que estandariza la jerarquía visual de los títulos de sección con soporte para líneas Full-Bleed.
 - `Grid System (Pattern)`: Implementación de una Grilla Unificada de 1440px (max-w-360) con paddings constantes (px-6), asegurando una alineación matemática perfecta (plomada visual) entre componentes de diferentes niveles (Header, Grillas, Carruseles, Secciones y Footer).
-
+- `Full-Bleed Containers (Pattern)`: Implementación arquitectónica donde los elementos visuales (como la línea del SectionTitle o el scroll infinito del ProductCarousel) ocupan el 100% del viewport (w-full), mientras que el contenido interno y el snapping respetan estrictamente la plomada de la grilla global (max-w-360 px-6).
 
 
 ## ✅ Logros y Avances
@@ -82,6 +82,8 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Rediseño Integral de Footer:** Nueva arquitectura editorial de tres niveles que integra activos de alta resolución (Logo/Slogan), newsletter y validación visual.
 - [x] **Optimización de UX y Copywriting:** Implementación de términos minimalistas para mejorar la legibilidad móvil y ajuste fino de los gaps globales para un ritmo de scroll más fluido.
 - [x] **Firma y Limpieza de Deuda:** Inclusión de créditos profesionales ("Developed by Innovación Digital") y limpieza de lógica redundante en el maquetado de LocationsSection.
+- [x] **Micro-navegación:** Creación e integración del componente atómico `Breadcrumbs` para mejorar la orientación del usuario en las jerarquías de productos.
+- [x] **Dominio de Layouts Complejos (Full-Bleed):** Resolución exitosa del patrón "Full-Bleed" para carruseles y líneas separadoras, logrando que rompan el contenedor para ocupar el 100% del viewport sin perder la alineación estricta (plomada visual) de la grilla interna.
 
 ## 🛠️ Próximos Pasos
 - [ ] **Unificación Tipográfica (Catálogo):** Refactorizar la página de /productos para eliminar fuentes itálicas residuales y alinear el H1 al nuevo sistema de diseño extendido.
