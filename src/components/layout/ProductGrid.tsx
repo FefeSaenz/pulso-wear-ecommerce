@@ -26,7 +26,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   viewAllText
 }) => {
   return (
-    <section className="w-full">
+    <section className="w-full flex flex-col gap-6">
       {/* TITULO FULL BLEED: Queda afuera del max-w-7xl para llegar de borde a borde */}
       {title && (
         <SectionTitle 

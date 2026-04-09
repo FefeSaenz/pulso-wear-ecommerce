@@ -13,7 +13,7 @@ const LOCATIONS = [
 
 const LocationsSection: React.FC = () => {
   return (
-    <section id="locals-section" className="w-full bg-white">
+    <section id="locals-section" className="w-full flex flex-col gap-6 bg-white">
       <SectionTitle title="Store" />
       <div className="max-w-360 mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
