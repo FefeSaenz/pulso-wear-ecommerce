@@ -27,10 +27,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onOpenProfile 
   };
 
   return (
-    <div className={`fixed inset-0 z-100 bg-white transition-transform duration-300 ease-out flex flex-col ${
-      isOpen ? 'translate-x-0 opacity-100 visible' : '-translate-x-full opacity-0 invisible'
-
-    }`}
+    <div 
+      className={`fixed inset-0 z-100 bg-white flex flex-col ui-slide-panel ui-slide-left ${isOpen ? 'is-open' : ''}`}
     >
       <div className="max-w-7xl mx-auto px-6 h-full flex flex-col w-full">
         
@@ -48,7 +46,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onOpenProfile 
             )}
           </Link>
           
-          <button onClick={onClose} className="text-gray-400 p-2"><i className="fa-solid fa-xmark text-xl"></i></button>
+          <button onClick={onClose} className="text-gray-400 p-2 cursor-pointer">
+            <i className="fa-solid fa-xmark text-xl"></i>
+          </button>
         </div>
         
         {/* LINKS GIGANTES */}
@@ -69,7 +69,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onOpenProfile 
 
         {/* FOOTER DRAWER */}
         <div className="border-t border-gray-100 py-8 shrink-0 flex flex-col space-y-6">
-          <button onClick={() => { onOpenProfile(); onClose(); }} className="flex items-center space-x-3 text-left w-fit">
+          <button onClick={() => { onOpenProfile(); onClose(); }} className="flex items-center space-x-3 text-left w-fit cursor-pointer">
             <i className="fa-regular fa-user text-lg text-gray-400"></i>
             <span className="text-[11px] font-bold text-gray-400 uppercase tracking-[2px]">Mi Cuenta</span>
           </button>

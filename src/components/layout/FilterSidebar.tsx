@@ -215,7 +215,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
 
         <button
           onClick={handleApplyPrice}
-          className="w-full bg-black text-white py-3 px-4 text-[11px] font-black uppercase tracking-[4px] hover:bg-gray-900 active:scale-[0.98] transition-all rounded-sm cursor-pointer"
+          className="w-full bg-black text-white py-3 px-4 text-[11px] font-black uppercase tracking-[4px] hover:bg-gray-900 active:scale-[0.98] transition-all cursor-pointer"
         >
           Aplicar
         </button>

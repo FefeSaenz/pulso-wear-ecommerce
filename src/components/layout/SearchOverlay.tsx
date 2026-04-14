@@ -17,8 +17,6 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTe
       if (e.key === 'Escape') onClose();
       if (e.key === 'Enter') {
         if (searchTerm.trim()) {
-          //onSearchChange(searchTerm); // Esto disparará el navigate en el Layout
-          //onClose();
           onSearchSubmit(searchTerm);
         }
       }
@@ -33,25 +31,30 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTe
     };
   }, [isOpen, onClose, searchTerm, onSearchSubmit]);
 
-  // 2. Auto-focus al abrir
+  // 2. Auto-focus al abrir (espera 50ms a que empiece la animación)
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  //if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-100 bg-white animate-in slide-in-from-top duration-300">
-      <div className="max-w-7xl mx-auto px-6 h-full flex flex-col">
-        <div className="flex items-center justify-between h-20 border-b border-gray-100">
-          <span className="text-[10px] font-black uppercase tracking-[4px]">Buscador PULSO</span>
-          <button onClick={onClose} className="text-gray-400 hover:text-black transition-colors">
+    <div className={`fixed inset-0 z-100 bg-white flex flex-col ui-fade-overlay ${isOpen ? 'is-open' : ''}`}>
+      <div className="max-w-7xl mx-auto px-6 h-full flex flex-col w-full">
+        
+        {/* Header del Buscador */}
+        <div className="flex items-center justify-between h-20 border-b border-gray-100 shrink-0">
+          <span className="text-[10px] font-black uppercase tracking-[4px] text-gray-400">BUSCAR</span>
+          <button onClick={onClose} className="text-gray-400 hover:text-black transition-colors cursor-pointer p-2">
             <i className="fa-solid fa-xmark text-xl"></i>
           </button>
         </div>
         
+        {/* Cuerpo del Buscador */}
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="w-full max-w-4xl">
             <input
@@ -60,16 +63,17 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTe
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="¿QUÉ ESTÁS BUSCANDO?"
-              className="w-full text-4xl md:text-7xl font-black uppercase tracking-tighter text-center outline-none border-none placeholder:text-gray-100"
+              className="w-full text-2xl sm:text-4xl lg:text-7xl font-black uppercase tracking-tighter text-center outline-none border-none placeholder:text-gray-100"
             />
             <div className="mt-8 flex justify-center space-x-4">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sugerencias:</span>
-              <button onClick={() => onSearchSubmit('Remera')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 cursor-pointer">Remeras</button>
-              <button onClick={() => onSearchSubmit('Pantalón')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 cursor-pointer">Pantalones</button>
-              <button onClick={() => onSearchSubmit('Boxy')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 cursor-pointer">Boxy Fit</button>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-[2px]">Sugerencias:</span>
+              <button onClick={() => onSearchSubmit('Remera')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer">Remeras</button>
+              <button onClick={() => onSearchSubmit('Pantalón')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer">Pantalones</button>
+              <button onClick={() => onSearchSubmit('Boxy')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer">Boxy Fit</button>
             </div>
           </div>
         </div>
+        
       </div>
     </div>
   );

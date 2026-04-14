@@ -32,6 +32,7 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - `Client-Side Hydration (Pattern)`: Interceptación de datos "ligeros" (DTOs) provenientes de la API para enriquecerlos dinámicamente con la data completa del catálogo en memoria, garantizando la disponibilidad de variantes (talles/colores) en los Modales sin sacrificar la velocidad de carga.
 - `Data Unification (Pattern)`: Centralización (Single Source of Truth) de la fusión del catálogo base con los productos destacados, inyectando etiquetas y creando un escudo defensivo (fallback) contra productos no listados por el backend.
 - `Path Aliasing (Pattern)`: Configuración estricta de alias absolutos (@/src/...) para dependencias globales y rutas relativas (./) para módulos locales, garantizando un árbol de importaciones escalable y eliminando el infierno de rutas relativas.
+- `UI Animation System (Pattern)`: Centralización de animaciones y estados de modales (Drawers, Overlays) mediante clases globales de CSS (`@layer components`), delegando las transiciones al motor de estilos para evitar cierres bruscos provocados por la destrucción de componentes en el ciclo de vida de React.
 
 ## ✅ Logros y Avances
 - [x] **Estado Global:** Migración exitosa a Context API para desacoplar la lógica del carrito de la UI.
@@ -102,9 +103,12 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Implementación de `useQuickView`:** Creación de un hook centralizado que resuelve el problema de "falta de variantes" en los productos de la Home, buscando dinámicamente el producto completo en el catálogo general antes de abrir el Modal de Vista Rápida.
 - [x] **Implementación de `useUnifiedProducts`:** Extracción de la lógica de unificación de productos a un hook puro, reduciendo masivamente el código en `Products.tsx` y `Home.tsx` y creando un escudo defensivo contra faltantes en la respuesta de la API.
 - [x] **Blindaje de TypeScript:** Resolución de errores de tipado estricto (manejo de nullables en interfaces de contexto `Product | null` y actualización de contratos de datos financieros `order.summary.total`).
+- [x] **Design System de Animaciones:** Creación de utilidades globales (`ui-backdrop`, `ui-slide-panel`, `ui-fade-overlay`) para unificar la fluidez y el comportamiento de todos los paneles desplegables de la aplicación.
+- [x] **Refactorización de Modales:** Eliminación del renderizado condicional destructivo (`if (!isOpen)`) en el Menú Mobile, Carrito y Panel de Filtros, logrando transiciones de salida (unmount) simétricas y suaves.
+- [x] **UX en Buscador Full-Screen:** Rediseño del `SearchOverlay` implementando animaciones de fundido (fade), diseño tipográfico responsivo para evitar cortes de texto en mobile y limpieza visual para un enfoque 100% utilitario.
+- [x] **Optimización de Performance y Pixel-Perfect:** Eliminación de web fonts no utilizadas para reducir el peso de carga, y corrección de la herencia CSS en la barra de filtros para lograr simetría exacta en los íconos de interacción.
 
 ## 🛠️ Próximos Pasos
-- [ ] **Lógica de Filtros Extendidos:** Conectar la maquetación visual de los nuevos parámetros ("Género" y "Rango de Precio") con el custom hook `useProductFilters` y sincronizarlos con la URL.
 - [ ] **Refactorización DRY (Don't Repeat Yourself):** Extracción de lógica repetida de mapeo de catálogos hacia un custom hook (`useUnifiedCatalog`) y creación de componentes atómicos para estados de carga/vacíos.
 - [ ] **Persistencia del Carrito:** Integrar `localStorage` para que el usuario no pierda los productos seleccionados si recarga o cierra la pestaña accidentalmente.
 - [ ] **Autenticación (Autenticación Google/JWT):** Implementar el login de usuarios para reemplazar el `GUEST_ID` temporal y vincular las órdenes directamente con las cuentas reales de los clientes.

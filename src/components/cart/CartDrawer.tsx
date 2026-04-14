@@ -22,16 +22,25 @@ const CartDrawer: React.FC<CartDrawerProps> = (props) => {
 
   return (
     <>
-      <div className={`fixed inset-0 bg-black/40 z-50 transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={onClose} />
+      {/* BACKDROP: Usando nuestra clase global ui-backdrop */}
+      <div 
+        className={`fixed inset-0 bg-black/40 z-50 ui-backdrop ${isOpen ? 'is-open' : ''}`} 
+        onClick={onClose} 
+      />
 
-      <div className={`fixed top-0 right-0 h-full bg-white z-50 w-full max-w-212.5 shadow-2xl transition-transform duration-300 transform flex ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      {/* DRAWER PANEL: Usando ui-slide-panel y ui-slide-right */}
+      <div 
+        className={`fixed top-0 right-0 h-full bg-white z-50 w-full max-w-212.5 shadow-2xl flex ui-slide-panel ui-slide-right ${isOpen ? 'is-open' : ''}`}
+      >
         
         <CartRecommendations onAddFromRec={onAddFromRec} />
 
         <div className="flex-1 flex flex-col h-full bg-white">
           <div className="p-6 flex items-center justify-between border-b border-gray-100">
             <h2 className="text-sm font-bold uppercase tracking-widest text-black">Mi Carrito</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-black transition-colors cursor-pointer"><i className="fa-solid fa-xmark text-xl"></i></button>
+            <button onClick={onClose} className="text-gray-400 hover:text-black transition-colors cursor-pointer">
+              <i className="fa-solid fa-xmark text-xl"></i>
+            </button>
           </div>
 
           <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">

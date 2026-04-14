@@ -168,48 +168,48 @@ const Products: React.FC = () => {
             </div>
 
             {/* --- DRAWER DE FILTROS EXCLUSIVO MOBILE --- */}
-            {isMobileFiltersOpen && (
-                <div className="fixed inset-0 z-50 flex md:hidden">
-                    {/* Backdrop / Fondo oscuro */}
-                    <div 
-                        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300" 
-                        onClick={() => setIsMobileFiltersOpen(false)}
-                    />
+            <div className={`fixed inset-0 z-50 flex md:hidden ${isMobileFiltersOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+                
+                {/* 1. Backdrop / Fondo oscuro (Aparece con Fade In) */}
+                <div 
+                    className={`absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer ui-backdrop ${isMobileFiltersOpen ? 'is-open' : ''}`} 
+                    onClick={() => setIsMobileFiltersOpen(false)}
+                />
+                
+                {/* 2. Panel lateral estilo brutalista (Entra con Slide Left) */}
+                <div className={`absolute top-0 left-0 h-full w-4/5 max-w-75 bg-white shadow-2xl flex flex-col ui-slide-panel ui-slide-left ${isMobileFiltersOpen ? 'is-open' : ''}`}>
                     
-                    {/* Panel lateral estilo brutalista */}
-                    <div className="absolute top-0 left-0 h-full w-4/5 max-w-75 bg-white shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
-                        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                            <h2 className="text-xl font-black uppercase tracking-tighter">Filtros</h2>
-                            <button 
-                                onClick={() => setIsMobileFiltersOpen(false)}
-                                className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors"
-                            >
-                                <i className="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-                        
-                        {/* El mismo FilterSidebar que usamos en PC, pero adentro del Drawer */}
-                        <div className="p-6 overflow-y-auto flex-1">
-                            <FilterSidebar 
-                                activeFilters={{ sizeFilter, colorFilter, priceFilter, searchTerm }}
-                                onFilterChange={handleFilterChange}
-                                onClearFilters={handleClearFilters}
-                                onCloseMobile={() => setIsMobileFiltersOpen(false)}
-                            />
-                        </div>
+                    <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                        <h2 className="text-xl font-black uppercase tracking-tighter">Filtros</h2>
+                        <button 
+                            onClick={() => setIsMobileFiltersOpen(false)}
+                            className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer"
+                        >
+                            <i className="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    
+                    {/* El mismo FilterSidebar que usamos en PC, pero adentro del Drawer */}
+                    <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                        <FilterSidebar 
+                            activeFilters={{ sizeFilter, colorFilter, priceFilter, searchTerm }}
+                            onFilterChange={handleFilterChange}
+                            onClearFilters={handleClearFilters}
+                            onCloseMobile={() => setIsMobileFiltersOpen(false)}
+                        />
+                    </div>
 
-                        {/* Botón para aplicar y cerrar */}
-                        <div className="p-6 border-t border-gray-100">
-                            <button 
-                                onClick={() => setIsMobileFiltersOpen(false)}
-                                className="w-full bg-black text-white py-4 text-[11px] font-black uppercase tracking-[4px] active:scale-[0.98] transition-all"
-                            >
-                                Ver Resultados
-                            </button>
-                        </div>
+                    {/* Botón para aplicar y cerrar */}
+                    <div className="p-6 border-t border-gray-100">
+                        <button 
+                            onClick={() => setIsMobileFiltersOpen(false)}
+                            className="w-full bg-black text-white py-4 text-[11px] font-black uppercase tracking-[4px] active:scale-[0.98] transition-all cursor-pointer"
+                        >
+                            Ver Resultados
+                        </button>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 };

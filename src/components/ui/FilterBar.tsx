@@ -30,20 +30,20 @@ const FilterBar: React.FC<FilterBarProps> = ({
           onClick={onOpenMobileFilters}
           className="flex md:hidden flex-1 py-4 border-r border-gray-100 items-center justify-center space-x-2 text-[10px] font-black uppercase tracking-[2px] active:bg-gray-50 transition-colors"
         >
-          <i className="fa-solid fa-sliders text-gray-400"></i>
+          <i className="fa-solid fa-sliders text-gray-400 text-sm"></i>
           <span>Filtrar</span>
         </button>
         
         {/* 3. ORDENAR (Mobile: ocupa el 50% restante | Desktop: Alineado a la derecha) */}
         <div className="flex-1 md:flex-none flex items-center justify-center md:justify-end py-4 md:py-0 space-x-2 md:space-x-4">
           {/* El texto "Ordenar por:" lo ocultamos en celu para ahorrar espacio */}
-          <span className="hidden md:inline text-[9px] font-black uppercase text-gray-400 tracking-widest">
+          <span className="hidden md:inline text-[9px] font-black uppercase text-gray-400 tracking-widest ">
             Ordenar por:
           </span>
           
           <div className="flex items-center space-x-2">
             {/* Iconito para mobile, le da un toque más pro al select */}
-            <i className="fa-solid fa-arrow-down-short-wide md:hidden text-gray-400"></i>
+            <i className="fa-solid fa-arrow-down-short-wide md:hidden text-gray-400 text-sm"></i>
             <select 
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value)}
