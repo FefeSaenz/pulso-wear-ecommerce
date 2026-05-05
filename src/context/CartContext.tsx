@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Product, CartItem, Order } from '../types/product.types';
+import { CartItem, Order } from '@/src/types/product.types';
 
 interface CartContextType {
   cart: CartItem[];
@@ -11,8 +11,9 @@ interface CartContextType {
   isCheckoutOpen: boolean;
   setIsCheckoutOpen: (open: boolean) => void;
   addToCart: (item: CartItem) => void;
-  updateQuantity: (id: string, size: string, delta: number) => void;
-  removeFromCart: (id: string, size: string) => void;
+  // Agregamos 'color: string' a estas dos:
+  updateQuantity: (id: string, size: string, color: string, delta: number) => void;
+  removeFromCart: (id: string, size: string, color: string) => void;
   handleCheckoutComplete: (newOrder: Order) => void;
   cartCount: number;
 }
@@ -68,11 +69,11 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
     setIsCartOpen(true);
   }, []);
 
-  const updateQuantity = useCallback((id: string, size: string, delta: number) => {
+  const updateQuantity = useCallback((id: string, size: string, color: string, delta: number) => {
     setCart((prev) =>
       prev
         .map((item) => {
-          if (item.id === id && item.selectedSize === size) {
+          if (item.id === id && item.selectedSize === size && item.selectedColor === color) {
             const newQty = Math.max(0, item.quantity + delta);
             return { ...item, quantity: newQty };
           }
@@ -82,17 +83,25 @@ export const CartProvider: React.FC<{children: React.ReactNode}> = ({ children }
     );
   }, []);
 
-  const removeFromCart = useCallback((id: string, size: string) => {
-    setCart((prev) => prev.filter((item) => !(item.id === id && item.selectedSize === size)));
+  const removeFromCart = useCallback((id: string, size: string, color: string) => {
+    setCart((prev) => prev.filter((item) => !(item.id === id && item.selectedSize === size && item.selectedColor === color)));
   }, []);
 
-  /*
-    FINALIZACIÓN DE COMPRA
-   */
+  
+  //  FINALIZACIÓN DE COMPRA
+  
   const handleCheckoutComplete = (newOrder: Order) => {
-    setOrders([newOrder, ...orders]);
-    setCart([]); // Al vaciar el array acá, el useEffect automáticamente borra el localStorage
+    // 1. Guardamos la orden en el estado local de pedidos
+    setOrders((prev) => [newOrder, ...prev]);
+    
+    // 2. Vaciamos el carrito (esto dispara el useEffect que limpia localStorage)
+    setCart([]); 
+    
+    // 3. Cerramos el modal de checkout
     setIsCheckoutOpen(false);
+
+    // 4. Cerramos también el carrito por si estaba abierto por algún motivo
+    setIsCartOpen(false);
   };
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);

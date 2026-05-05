@@ -32,19 +32,36 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
   const [formData, setFormData] = useState({
     email: '', 
     name: '',
-    dni: '', // NUEVO
+    dni: '',
     phone: '',
     address: '', 
     city: '', 
     zip: '',
   });
 
-  // EFECTO: Pre-llenar el email si el usuario está logueado, pero dejándolo editable
+  // EFECTO: Pre-llenar el email si el usuario está logueado
   useEffect(() => {
-    if (user?.email && isOpen) {
-      setFormData((prev) => ({ ...prev, email: prev.email || user.email }));
+    if (isOpen) {
+      // Al abrir: Forzamos el mail del usuario logueado. Si es nulo, string vacío.
+      setFormData((prev) => ({ 
+        ...prev, 
+        email: user ? user.email : '' 
+      }));
+    } else {
+      // Al cerrar: Hacemos un "Reseteo de Fábrica" para matar cualquier dato fantasma
+      setStep(1);
+      setErrors([]);
+      setFormData({
+        email: '', 
+        name: '',
+        dni: '',
+        phone: '',
+        address: '', 
+        city: '', 
+        zip: '',
+      });
     }
-  }, [user, isOpen]);
+  }, [isOpen, user]);
   
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   
@@ -127,11 +144,17 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
 
       try {
         const response = await api.post('/shop/cart/', newOrder);
+        // Usamos el ID real que devuelve tu compañero desde el Backend
         const orderIdGenerado = response.data?.id || `TEMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
         
+        // Creamos una copia de la orden con el ID final para el Contexto
+        const finalizedOrder = { ...newOrder, id: orderIdGenerado };
+
         setLoading(false);
-        toast.success("¡Pedido generado con éxito!");
-        onComplete(newOrder); 
+        toast.success(`¡Pedido #${orderIdGenerado} generado con éxito!`);
+        
+        // ESTO ES CLAVE: Le pasamos la orden finalizada al contexto
+        onComplete(finalizedOrder); 
         
         onClose();
         navigate(`/orden/${orderIdGenerado}`); 

@@ -66,7 +66,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTe
               className="w-full text-2xl sm:text-4xl lg:text-7xl font-black uppercase tracking-tighter text-center outline-none border-none placeholder:text-gray-100"
             />
             <div className="mt-8 flex justify-center space-x-4">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-[2px]">Sugerencias:</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Sugerencias:</span>
               <button onClick={() => onSearchSubmit('Remera')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer">Remeras</button>
               <button onClick={() => onSearchSubmit('Pantalón')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer">Pantalones</button>
               <button onClick={() => onSearchSubmit('Boxy')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer">Boxy Fit</button>

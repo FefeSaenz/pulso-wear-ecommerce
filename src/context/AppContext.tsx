@@ -96,10 +96,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       allProducts,
       categories,
       menuItems,
-      logoText: "PULSO WEAR", // Hardcodeado como hablamos, esto es branding, no data.
+      logoText: "PULSO WEAR",
       loading, 
       error,
-      frontConfig // EXPONEMOS EL ESTADO AL RESTO DE LA APP
+      frontConfig
     }}>
       {children}
     </AppContext.Provider>

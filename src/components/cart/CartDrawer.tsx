@@ -11,8 +11,8 @@ interface CartDrawerProps {
   onClose: () => void;
   onOpenCheckout: () => void;
   cart: CartItemType[];
-  onUpdateQuantity: (id: string, size: string, delta: number) => void;
-  onRemove: (id: string, size: string) => void;
+  onUpdateQuantity: (id: string, size: string, color: string, delta: number) => void;
+  onRemove: (id: string, size: string, color: string) => void;
   onAddFromRec: (product: Product) => void;
 }
 
@@ -49,7 +49,12 @@ const CartDrawer: React.FC<CartDrawerProps> = (props) => {
             <div className="space-y-8">
               {cart.length > 0 ? (
                 cart.map((item) => (
-                  <CartItem key={`${item.id}-${item.selectedSize}`} item={item} onUpdateQuantity={onUpdateQuantity} onRemove={onRemove} />
+                  <CartItem 
+                    key={`${item.id}-${item.selectedSize}-${item.selectedColor}`} // KEY ÚNICA
+                    item={item} 
+                    onUpdateQuantity={onUpdateQuantity} 
+                    onRemove={onRemove} 
+                  />
                 ))
               ) : (
                 <EmptyState message="Tu carrito está vacío" icon="fa-cart-arrow-down" />
