@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Order } from '@/src/types/product.types';
 import { useAuth } from '@/src/context/AuthContext';
 import { toast } from 'sonner';
+import Price from './Price';
 
 interface UserProfileProps {
   isOpen: boolean;
@@ -56,9 +57,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(price);
 
   const handleSendCode = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -210,7 +208,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
 
                         <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                           <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Total</span>
-                          <span className="text-xs font-black text-black">{formatPrice(order.summary.total)}</span>
+                          <Price amount={order.summary.total} className="text-xs font-black text-black" />
                         </div>
                       </Link>
                     ))}

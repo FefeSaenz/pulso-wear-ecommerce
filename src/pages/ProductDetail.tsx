@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useOutletContext } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 // Contexts y Utils de PULSO
 import { useApp } from '@/src/context/AppContext';
@@ -129,6 +130,25 @@ const ProductDetail: React.FC = () => {
   return (
     // Envolvemos todo en un Fragment para poder poner el Carousel AFUERA del contenedor
     <div className='flex flex-col gap-16 pb-16 animate-in fade-in duration-500'>
+
+      {/* --- 2. ACÁ INYECTAMOS EL SEO DINÁMICO --- */}
+      <Helmet>
+        {/* Título en la pestaña del navegador */}
+        <title>{`PULSO | ${product.name}`}</title>
+        <meta name="description" content={product.description || `Comprá ${product.name} online en Pulso Wear.`} />
+        
+        {/* Open Graph (WhatsApp, Facebook, Instagram, LinkedIn) */}
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={`PULSO | ${product.name}`} />
+        <meta property="og:description" content={product.description || `Descubrí nuestra nueva colección. ${product.name} disponible ahora.`} />
+        <meta property="og:image" content={mainImage || (product.images && product.images[0]) || ''} />
+        <meta property="og:url" content={window.location.href} />
+        
+        {/* Twitter Cards (También lo usan Discord y Telegram) */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`PULSO | ${product.name}`} />
+        <meta name="twitter:image" content={mainImage || (product.images && product.images[0]) || ''} />
+      </Helmet>
       <div className="max-w-360 mx-auto px-6 pt-6 md:pt-10 w-full">
         
         {/* BREADCRUMBS */}
