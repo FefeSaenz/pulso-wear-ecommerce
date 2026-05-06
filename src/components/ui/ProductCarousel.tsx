@@ -90,14 +90,15 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({
           {products.map((product, idx) => (
             <div 
               key={`${product.id}-${idx}`} 
-              className="snap-start shrink-0 w-[75vw] md:w-[45%] lg:w-[23%]"
+              // CAMBIO ACÁ: El "Sweet Spot" de los tamaños
+              className="snap-start shrink-0 w-[55vw] sm:w-[45vw] md:w-[35%] lg:w-[22%] xl:w-[20%]"
             >
               <ProductCard product={product} onAdd={onAdd} />
             </div>
           ))}
           
           {/* Tarjeta final opcional ("Ver más") para darle un cierre elegante en mobile */}
-          <div className="snap-start shrink-0 w-[45%] md:hidden flex">
+          <div className="snap-start shrink-0 w-[55vw] sm:w-[45vw] md:hidden flex">
             <Link 
               to={viewAllLink}
               className="flex-1 flex flex-col items-center justify-center gap-4 bg-gray-50 transition-colors text-black rounded-sm p-4 group"

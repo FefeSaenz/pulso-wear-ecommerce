@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link, useOutletContext } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
@@ -36,6 +36,10 @@ const ProductDetail: React.FC = () => {
   const [mainImage, setMainImage] = useState<string>('');
   const [error, setError] = useState<string>('');
 
+  // NUEVO: Estado y Ref para controlar el Slider Mobile
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
   // 3. INICIALIZAR DATA (Basado en tu interfaz Product)
   useEffect(() => {
     if (product) {
@@ -53,8 +57,22 @@ const ProductDetail: React.FC = () => {
       
       setSelectedSize(null);
       setError('');
+      setCurrentSlide(0); // Reiniciamos el slider al cambiar de producto
     }
   }, [product]);
+
+  // Lógica de flechas para el Slider Mobile
+  const handlePrevSlide = () => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollBy({ left: -sliderRef.current.clientWidth, behavior: 'smooth' });
+    }
+  };
+
+  const handleNextSlide = () => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollBy({ left: sliderRef.current.clientWidth, behavior: 'smooth' });
+    }
+  };
 
   // 4. LÓGICA DE VARIANTES
   const availableColors = useMemo(() => {
@@ -63,11 +81,11 @@ const ProductDetail: React.FC = () => {
   }, [product]);
 
   const availableSizes = useMemo(() => {
-  if (!product?.variants || !selectedColor) return [];
-  const variant = product.variants.find(v => v.color.name === selectedColor);
-  // Devolvemos los objetos enteros para saber si hay stock
-  return variant ? variant.sizes : []; 
-}, [product, selectedColor]);
+    if (!product?.variants || !selectedColor) return [];
+    const variant = product.variants.find(v => v.color.name === selectedColor);
+    // Devolvemos los objetos enteros para saber si hay stock
+    return variant ? variant.sizes : []; 
+  }, [product, selectedColor]);
 
   // 5. MANEJADOR DEL CARRITO (Respetando tu interfaz CartItem)
   const handleAddToCart = () => {
@@ -149,32 +167,116 @@ const ProductDetail: React.FC = () => {
         <meta name="twitter:title" content={`PULSO | ${product.name}`} />
         <meta name="twitter:image" content={mainImage || (product.images && product.images[0]) || ''} />
       </Helmet>
-      <div className="max-w-360 mx-auto px-6 pt-6 md:pt-10 w-full">
+      
+      {/* AJUSTE ESPACIADO BREADCRUMBS: Redujimos pt-10 a pt-6 para achicar el margen superior general */}
+      <div className="max-w-360 mx-auto px-6 pt-6 w-full">
         
         {/* BREADCRUMBS */}
+        {/* AJUSTE ESPACIADO BREADCRUMBS: Sacamos el md:mb-10 y lo dejamos en mb-6 para achicar el margen inferior */}
         <Breadcrumbs 
-          className='mb-6 md:mb-10'
+          className='mb-6'
           items={[
             { label: product.category, href: `/category/${product.category.toLowerCase().replace(/\s+/g, '-')}` },
             { label: product.name }
           ]} 
         />
 
-        <div className="flex flex-col md:flex-row gap-12 lg:gap-20 ">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-20">
           
-          {/* GALERÍA DE IMÁGENES (Responsiva) */}
-          <div className="w-full md:w-1/2 flex flex-col md:flex-row gap-4 md:gap-6">
+          {/* 1. VISTA MOBILE / TABLET (Slider con Dots y Flechas) */}
+          <div className="lg:hidden w-full md:max-w-[500px] md:mx-auto flex flex-col relative">
             
-            {/* Miniaturas (Desktop: Izquierda Vertical / Mobile: Abajo Horizontal) */}
+            {/* Etiqueta de Oferta Superpuesta */}
+            {(product.discount_percentage || (product.original_price && product.original_price > product.price)) ? (
+              <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[3px] z-20 rounded-sm pointer-events-none shadow-md">
+                {product.discount_percentage ? `-${product.discount_percentage}%` : 'Oferta'}
+              </div>
+            ) : null}
+
+            {/* Contenedor del Carrusel Native Scroll Snap */}
+            <div 
+              ref={sliderRef}
+              className="flex w-full overflow-x-auto snap-x snap-mandatory no-scrollbar rounded-sm bg-gray-50"
+              onScroll={(e) => {
+                const scrollLeft = e.currentTarget.scrollLeft;
+                const width = e.currentTarget.clientWidth;
+                // Calculamos en qué foto estamos parados
+                setCurrentSlide(Math.round(scrollLeft / width));
+              }}
+            >
+              {product.images && product.images.length > 0 ? (
+                product.images.map((img: string, idx: number) => (
+                  <div key={idx} className="w-full shrink-0 snap-center relative aspect-4/5">
+                    <img 
+                      src={img} 
+                      alt={`${product.name} ${idx + 1}`} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="w-full shrink-0 snap-center aspect-4/5 flex items-center justify-center text-gray-300 text-xs font-bold uppercase tracking-widest">
+                  Sin Imagen
+                </div>
+              )}
+            </div>
+
+            {/* CONTROLES: Flechas y Puntos (Siempre visibles) */}
+            <div className="flex items-center justify-between w-full mt-4">
+              
+              {/* Flecha Izquierda */}
+              <button 
+                onClick={handlePrevSlide}
+                disabled={currentSlide === 0}
+                className="text-black hover:opacity-70 transition-opacity py-2 pr-4 cursor-pointer disabled:opacity-30 disabled:cursor-default"
+              >
+                <i className="fa-solid fa-arrow-left text-lg"></i>
+              </button>
+
+              {/* Puntos Indicadores (Dots) circulares */}
+              <div className="flex justify-center items-center gap-2.5">
+                {/* Forzamos a que renderice 1 dot aunque no haya imágenes, o mapee las reales */}
+                {(product.images && product.images.length > 0 ? product.images : ['placeholder']).map((_, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`rounded-full transition-all duration-300 ${
+                      currentSlide === idx 
+                        ? 'w-2 h-2 bg-black scale-110' 
+                        : 'w-2 h-2 bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Flecha Derecha */}
+              <button 
+                onClick={handleNextSlide}
+                disabled={!product.images || currentSlide === product.images.length - 1 || product.images.length === 0}
+                className="text-black hover:opacity-70 transition-opacity py-2 pl-4 cursor-pointer disabled:opacity-30 disabled:cursor-default"
+              >
+                <i className="fa-solid fa-arrow-right text-lg"></i>
+              </button>
+
+            </div>
+          </div>
+
+          {/* ========================================== */}
+          {/* 2. VISTA DESKTOP (Miniaturas + Foto Gigante) */}
+          {/* ========================================== */}
+          {/* AJUSTE NOTEBOOK: Limitamos el ancho max a 480px en lg para que la foto no explote en pantallas 720p, 
+              pero vuelve a estar libre (xl:max-w-none) para tu monitor 4K. */}
+          <div className="hidden lg:flex w-full lg:w-1/2 lg:max-w-[480px] xl:max-w-none flex-row gap-6">
+            
+            {/* Miniaturas (Verticales) */}
             {product.images && product.images.length > 0 && (
-              <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto no-scrollbar order-2 md:order-1 w-full md:w-20 lg:w-24 shrink-0 pb-2 md:pb-0">
+              <div className="flex flex-col gap-3 overflow-y-auto no-scrollbar w-24 shrink-0 pb-2 pr-1">
                 {product.images.map((img: string, idx: number) => (
                   <button 
                     key={idx} 
                     onClick={() => setMainImage(img)}
-                    className={`w-20 md:w-full aspect-4/5 shrink-0 transition-all cursor-pointer rounded-sm flex group overflow-hidden ${
+                    className={`w-full aspect-4/5 shrink-0 transition-all cursor-pointer rounded-sm flex group overflow-hidden ${
                       mainImage === img 
-                        ? 'z-10 p-0 border-0 outline-none appearance-none ' 
+                        ? 'z-10 p-0 border-0 outline-none appearance-none ring-1 ring-black/10' 
                         : 'hover:opacity-80 p-0 border-0 outline-none appearance-none bg-transparent'
                     }`}
                   >
@@ -189,8 +291,7 @@ const ProductDetail: React.FC = () => {
             )}
 
             {/* Imagen Principal */}
-            <div className="flex-1 order-1 md:order-2 aspect-4/5 bg-gray-50 rounded-sm overflow-hidden relative group flex">
-              {/* NUEVO: ETIQUETA DE OFERTA SUPERPUESTA (Z-20 para estar sobre la imagen) */}
+            <div className="flex-1 aspect-4/5 bg-gray-50 rounded-sm overflow-hidden relative group flex">
               {(product.discount_percentage || (product.original_price && product.original_price > product.price)) ? (
                 <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[3px] z-20 rounded-sm pointer-events-none shadow-md">
                   {product.discount_percentage ? `-${product.discount_percentage}%` : 'Oferta'}
@@ -211,8 +312,10 @@ const ProductDetail: React.FC = () => {
             
           </div>
 
-          {/* INFO Y COMPRA */}
-          <div className="w-full md:w-1/2 flex flex-col">
+          {/* ========================================== */}
+          {/* INFO Y COMPRA (Columna Derecha / Abajo)    */}
+          {/* ========================================== */}
+          <div className="w-full lg:w-1/2 flex flex-col">
             {/* Etiqueta / Tag */}
             {product.tags && (
               <span className="inline-block bg-black text-white text-[9px] font-black uppercase tracking-[3px] px-3 py-1.5 w-max mb-6 rounded-sm">
@@ -228,13 +331,6 @@ const ProductDetail: React.FC = () => {
             {/* SKU y Rating */}
             <div className="flex flex-wrap items-center gap-4 mb-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">
               {product.base_sku && <span>SKU: {product.base_sku}</span>}
-              
-              {/* RATING:
-              {product.rating && (
-                <span className="flex items-center gap-1 text-black">
-                  ★ {product.rating} <span className="text-gray-400">({product.reviews_count || 0})</span>
-                </span>
-              )}*/}
             </div>
 
             {/* Precio */}
@@ -326,17 +422,14 @@ const ProductDetail: React.FC = () => {
             {/* Description y Detalles (Type-Safe) */}
             <div className="border-t border-gray-100 pt-8 mt-4 space-y-8">
               <div>
-                {/* Título unificado a 12px */}
                 <h3 className="text-[12px] font-black uppercase tracking-[2px] text-black mb-4">Descripción</h3>
                 <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">
                   {product.description || 'Prenda premium diseñada para el uso urbano diario. Ofrece la combinación ideal entre confort duradero y cortes contemporáneos.'}
                 </p>
               </div>
               
-              {/* Solo renderiza si hay subcategoría, categoría o género */}
               {(product.brand || product.material || product.category || product.subcategory || product.gender) && (
                 <div>
-                  {/* Título unificado a 12px */}
                   <h3 className="text-[12px] font-black uppercase tracking-[2px] text-black mb-4">Detalles</h3>
                   
                   <ul className="space-y-3">

@@ -47,7 +47,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       
       {/* CONTENIDO DEL GRID: Acá aplicamos la magia "Dumb Component" */}
       {/* Si es Home, se auto-contiene. Si es Catálogo, usa el 100% y confía en el padre */}
-      <div className={layoutMode === 'home' ? "max-w-360 mx-auto px-4 md:px-6" : "w-full"}>
+      <div className={layoutMode === 'home' ? "w-full max-w-360 mx-auto px-4 md:px-6" : "w-full"}>
         
         {quantityLabel && products.length > 0 && (
           <div className="flex items-center justify-between mb-8">

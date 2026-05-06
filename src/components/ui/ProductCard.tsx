@@ -27,12 +27,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
   return (
       // 1. Contenedor principal es un DIV, con grupo relativo para hover
       <div 
-        className="flex flex-col group relative" 
+        className="flex flex-col group relative w-full" 
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* SECCIÓN DE IMAGEN (Aspect Ratio 3/4) */}
-        <div className="relative aspect-3/4 overflow-hidden bg-gray-100 rounded-sm">
+        <div className="relative aspect-3/4 overflow-hidden bg-gray-100 rounded-sm w-full">
           
           {/* CAPA 1: La imagen de fondo (con zoom sutil en hover) */}
           <img
