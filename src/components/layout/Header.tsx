@@ -13,45 +13,32 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch, cartCount }) => {
-  // Consumimos la data real de la API desde nuestro Contexto
   const { menuItems, logoText } = useApp();
-
-  // ESTADO PARA CONTROLAR EL MENÚ MOBILE (DRAWER)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  /**
-   * MANEJADOR DE NAVEGACIÓN
-   * Lógica centralizada para manejar el scroll suave o la navegación estándar.
-   */
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     const isAnchor = href.includes('#');
     const isExternalPage = window.location.pathname !== '/';
 
     if (isAnchor && !isExternalPage) {
-      // CASO A: Ya estamos en la Home. Evitamos recarga y scrolleamos.
       e.preventDefault();
       const targetId = href.split('#')[1];
       document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
     } 
-    
-    // CASO B: Estamos en otra página. 
-    // NO ejecutamos e.preventDefault(), permitiendo que <Link> nos lleve a "/"
-    // Una vez ahí, el useEffect de la Home que pusimos arriba hará el resto.
-
     setIsMobileMenuOpen(false);
   };
   
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-5 md:px-5 h-20 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 px-5 lg:px-5 h-20 flex items-center justify-between">
         
         {/* --- 1. BLOQUE IZQUIERDO --- */}
         <div className="flex items-center space-x-5 ">
           
-          {/* Mobile: Hamburguesa */}
+          {/* Mobile/Tablet: Hamburguesa */}
           <button 
             onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden text-gray-800 hover:text-black transition-transform active:scale-95 cursor-pointer"
+            className="lg:hidden text-gray-800 hover:text-black transition-transform active:scale-95 cursor-pointer"
             aria-label="Abrir menú"
           >
             <div className="flex flex-col space-y-1.5 items-start">
@@ -61,26 +48,26 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
             </div>
           </button>
 
-          {/* Mobile: Lupa (En desktop se esconde porque va a la derecha) */}
+          {/* Mobile/Tablet: Lupa */}
           <button 
             onClick={onOpenSearch} 
-            className="md:hidden text-gray-800 hover:text-black transition-transform active:scale-95 cursor-pointer"
+            className="lg:hidden text-gray-800 hover:text-black transition-transform active:scale-95 cursor-pointer"
             aria-label="Buscar"
           >
             <i className="fa-solid fa-magnifying-glass text-lg"></i>
           </button>
 
           {/* Desktop: Logo (Alineado a la izquierda) */}
-          <Link to="/" className="hidden md:flex items-center hover:opacity-80 transition-opacity py-1">
+          <Link to="/" className="hidden lg:flex items-center hover:opacity-80 transition-opacity py-1">
             {logoPulso ? (
-              <img src={logoPulso} alt="Pulso Wear" className="h-14 md:h-16 w-auto object-contain object-left transition-all" />
+              <img src={logoPulso} alt="Pulso Wear" className="h-14 lg:h-16 w-auto object-contain object-left transition-all" />
             ) : (
               <span className="text-3xl font-black tracking-tighter">{logoText}</span>
             )}
           </Link>
           
-          {/* Desktop: Navegación (Se oculta en mobile) */}
-          <nav className="hidden md:flex items-center space-x-6 h-full">
+          {/* Desktop: Navegación (Se oculta en mobile/tablet) */}
+          <nav className="hidden lg:flex items-center space-x-6 h-full">
             {menuItems && menuItems.length > 0 ? (
               menuItems.map((item) => (
                 <NavLink key={item.id} item={item} onClick={handleNavClick} className="h-full text-[11px] tracking-[3px]" />
@@ -91,8 +78,8 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
           </nav>
         </div>
 
-        {/* --- 2. BLOQUE CENTRAL (Solo Mobile) --- */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:hidden">
+        {/* --- 2. BLOQUE CENTRAL (Solo Mobile/Tablet) --- */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:hidden">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
             {logoPulso ? (
               <img src={logoPulso} alt="Pulso Wear" className="h-10 w-auto object-contain" />
@@ -108,22 +95,22 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
           {/* Desktop: Lupa */}
           <button 
             onClick={onOpenSearch} 
-            className="hidden md:block text-gray-800 hover:text-black transition-transform active:scale-95 cursor-pointer"
+            className="hidden lg:block text-gray-800 hover:text-black transition-transform active:scale-95 cursor-pointer"
             aria-label="Buscar"
           >
             <i className="fa-solid fa-magnifying-glass text-lg"></i>
           </button>
 
-          {/* Desktop: Perfil (En mobile el acceso está dentro del MobileMenu) */}
+          {/* Desktop: Perfil */}
           <button 
             onClick={onOpenProfile} 
-            className="hidden md:block text-gray-800 hover:text-black transition-transform active:scale-95 cursor-pointer"
+            className="hidden lg:block text-gray-800 hover:text-black transition-transform active:scale-95 cursor-pointer"
             aria-label="Perfil de usuario"
           >
             <i className="fa-regular fa-user text-lg"></i>
           </button>
 
-          {/* Mobile & Desktop: Carrito */}
+          {/* Mobile, Tablet & Desktop: Carrito */}
           <button 
             onClick={onOpenCart} 
             className="relative group transition-transform active:scale-95 cursor-pointer"

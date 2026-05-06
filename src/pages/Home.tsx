@@ -127,6 +127,7 @@ const Home: React.FC = () => {
                 quantityLabel={false}
                 viewAllLink="/productos"
                 viewAllText="Ver Toda La Colección"
+                layoutMode="home"
             />
             
             {/* SECCIÓN OFERTAS: Carrusel (Solo se muestra si hay ofertas activas) */}

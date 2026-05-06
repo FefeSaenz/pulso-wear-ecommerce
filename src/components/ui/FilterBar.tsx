@@ -4,7 +4,7 @@ interface FilterBarProps {
   title: React.ReactNode;
   sortBy: string;
   onSortChange: (value: string) => void;
-  onOpenMobileFilters: () => void; // NUEVO: Prop para abrir el Drawer en mobile
+  onOpenMobileFilters: () => void;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({ 
@@ -14,47 +14,52 @@ const FilterBar: React.FC<FilterBarProps> = ({
   onOpenMobileFilters
 }) => {
   return (
-    // Contenedor principal: Sin padding en mobile para que los botones ocupen el 100% del alto, padding normal en Desktop
+    // Contenedor principal: Sticky abajo del Header (top-20)
     <div id="shop-section" className="sticky top-20 z-30 bg-white/95 backdrop-blur-sm border-b border-gray-100 w-full">
-      <div className="w-full flex flex-row items-center justify-between md:max-w-360 md:mx-auto md:px-6 md:py-4">
       
-        {/* 1. TÍTULO (Solo Desktop: reemplaza a las categorías, oculto en mobile) */}
-        <div className="hidden md:flex w-auto">
-          <h1 className="text-2xl lg:text-3xl font-syne font-black uppercase tracking-tighter leading-none mt-1 text-black">
+      <div className="w-full flex flex-col lg:flex-row lg:items-center justify-between lg:max-w-360 lg:mx-auto lg:px-6">
+      
+        {/* 1. TÍTULO (Alineado a la izquierda siempre) */}
+        {/* Agregamos px-6 en mobile para que respete el margen de la grilla de productos */}
+        <div className="flex items-center justify-start w-full lg:w-auto py-3 lg:py-4 px-6 lg:px-0 border-b border-gray-100 lg:border-none">
+          <h1 className="text-xl lg:text-3xl font-syne font-black uppercase tracking-tighter leading-none text-black">
               {title}
           </h1>
         </div>
 
-        {/* 2. BOTÓN FILTRAR (Solo Mobile: visible en mobile, oculto en md en adelante) */}
-        <button 
-          onClick={onOpenMobileFilters}
-          className="flex md:hidden flex-1 py-4 border-r border-gray-100 items-center justify-center space-x-2 text-[10px] font-black uppercase tracking-[2px] active:bg-gray-50 transition-colors"
-        >
-          <i className="fa-solid fa-sliders text-gray-400 text-sm"></i>
-          <span>Filtrar</span>
-        </button>
-        
-        {/* 3. ORDENAR (Mobile: ocupa el 50% restante | Desktop: Alineado a la derecha) */}
-        <div className="flex-1 md:flex-none flex items-center justify-center md:justify-end py-4 md:py-0 space-x-2 md:space-x-4">
-          {/* El texto "Ordenar por:" lo ocultamos en celu para ahorrar espacio */}
-          <span className="hidden md:inline text-[9px] font-black uppercase text-gray-400 tracking-widest ">
-            Ordenar por:
-          </span>
-          
-          <div className="flex items-center space-x-2">
-            {/* Iconito para mobile, le da un toque más pro al select */}
-            <i className="fa-solid fa-arrow-down-short-wide md:hidden text-gray-400 text-sm"></i>
-            <select 
-              value={sortBy}
-              onChange={(e) => onSortChange(e.target.value)}
-              className="text-[10px] font-black uppercase tracking-[2px] outline-none bg-transparent cursor-pointer text-center md:text-left text-black"
+        {/* CONTENEDOR DE BOTONES (Fila en mobile: 50% Filtrar / 50% Ordenar) */}
+        <div className="flex flex-row w-full lg:w-auto">
+            {/* 2. BOTÓN FILTRAR (Solo Mobile/Tablet) */}
+            <button 
+              onClick={onOpenMobileFilters}
+              className="flex lg:hidden flex-1 py-3.5 border-r border-gray-100 items-center justify-center space-x-2 text-[10px] font-black uppercase tracking-[2px] active:bg-gray-50 transition-colors cursor-pointer"
             >
-              <option value="default">Recomendados</option>
-              <option value="price-low">Menor Precio</option>
-              <option value="price-high">Mayor Precio</option>
-            </select>
-          </div>
+              <i className="fa-solid fa-sliders text-gray-400 text-sm"></i>
+              <span>Filtrar</span>
+            </button>
+            
+            {/* 3. ORDENAR */}
+            <div className="flex-1 lg:flex-none flex items-center justify-center lg:justify-end py-3.5 lg:py-0 space-x-2 lg:space-x-4">
+              {/* Texto oculto en mobile para ahorrar espacio */}
+              <span className="hidden lg:inline text-[9px] font-black uppercase text-gray-400 tracking-widest ">
+                Ordenar por:
+              </span>
+              
+              <div className="flex items-center space-x-2">
+                <i className="fa-solid fa-arrow-down-short-wide lg:hidden text-gray-400 text-sm"></i>
+                <select 
+                  value={sortBy}
+                  onChange={(e) => onSortChange(e.target.value)}
+                  className="text-[10px] font-black uppercase tracking-[2px] outline-none bg-transparent cursor-pointer text-center lg:text-left text-black"
+                >
+                  <option value="default">Recomendados</option>
+                  <option value="price-low">Menor Precio</option>
+                  <option value="price-high">Mayor Precio</option>
+                </select>
+              </div>
+            </div>
         </div>
+        
       </div>
     </div>
   );

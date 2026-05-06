@@ -6,7 +6,7 @@ import { useApp } from '@/src/context/AppContext';
 import { useProductFilters } from '@/src/hooks/useProductFilters';
 import { Product } from '@/src/types/product.types';
 import { useQuickView } from '@/src/hooks/useQuickView';
-import { useUnifiedProducts } from '@/src/hooks/useUnifiedProducts'; // NUEVO hook para productos unificados
+import { useUnifiedProducts } from '@/src/hooks/useUnifiedProducts'; 
 
 // UI Components
 import ProductGrid from '@/src/components/layout/ProductGrid';
@@ -25,7 +25,7 @@ const Products: React.FC = () => {
 
     const { handleQuickView } = useQuickView(setSelectedQuickView);
     
-    const { unifiedProducts } = useUnifiedProducts(); // Obtenemos los productos unificados desde el nuevo hook
+    const { unifiedProducts } = useUnifiedProducts(); 
 
     const { category: paramCategory } = useParams<{ category: string }>();
 
@@ -36,8 +36,6 @@ const Products: React.FC = () => {
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
     // 1. COMBINACIÓN Y NORMALIZACIÓN DE DATA
-    // El hook useUnifiedProducts ya se encarga de juntar el catálogo con los destacados.
-    // Acá solo filtramos si estamos en la ruta de ofertas.
     const combinedProducts = useMemo(() => {
         if (isOffersRoute) {
             return unifiedProducts.filter(p => p.discount_percentage && p.discount_percentage > 0);
@@ -45,11 +43,9 @@ const Products: React.FC = () => {
         return unifiedProducts;
     }, [unifiedProducts, isOffersRoute]);
     
-    // 2. PARÁMETROS DE LA URL (Single Source of Truth)
-    // NUEVO: Ahora la categoría principal viene del Router (ej: /category/pantalones)
-    // Si no hay categoría en la ruta, miramos si hay en los searchParams (?categoria=...), y si no, "Todos".
+    // 2. PARÁMETROS DE LA URL
     const initialCategory = paramCategory 
-        ? paramCategory.charAt(0).toUpperCase() + paramCategory.slice(1) // Capitalizamos (pantalones -> Pantalones)
+        ? paramCategory.charAt(0).toUpperCase() + paramCategory.slice(1) 
         : searchParams.get('categoria') || 'Todos';
 
     const sizeFilter = searchParams.get('talle');
@@ -74,9 +70,7 @@ const Products: React.FC = () => {
     });
 
     // 4. SINCRONIZACIÓN: URL -> HOOK
-    // Esto asegura que si el usuario navega (o vuelve atrás), el hook se entere
     useEffect(() => {
-        // NUEVO: Le pasamos la categoría que leímos de la ruta dinámica
         setActiveCategory(isOffersRoute ? 'Todos' : initialCategory);
         setActiveSize(sizeFilter);
         setActiveColor(colorFilter);
@@ -84,8 +78,6 @@ const Products: React.FC = () => {
     }, [initialCategory, sizeFilter, colorFilter, priceFilter, setActiveCategory, setActiveSize, setActiveColor, setActivePrice, isOffersRoute]);
     
     // 5. MANEJADOR DE FILTROS
-    // Este manejador controla la barra superior y cambia de PÁGINA
-    
     const handleFilterChange = (key: string, value: string | null) => {
         const newParams = new URLSearchParams(searchParams);
         if (value) newParams.set(key, value);
@@ -95,12 +87,10 @@ const Products: React.FC = () => {
         setSearchParams(newParams);
     };
 
-    // Función maestra para limpiar la URL de talle y color
     const handleClearFilters = () => {
         setSearchParams(new URLSearchParams());
     };
 
-    // Título dinámico para el H1
     const pageTitle = searchTerm
         ? 'BÚSQUEDA'
         : isOffersRoute 
@@ -111,16 +101,14 @@ const Products: React.FC = () => {
               )
             : (activeCategory === 'Todos' ? 'CATÁLOGO' : activeCategory);
 
-
-    // Lógica Breadcrumbs
     const breadcrumbItems = useMemo(() => {
         if (searchTerm) return [{ label: 'Catálogo', href: '/productos' }, { label: 'Búsqueda' }];
         if (isOffersRoute) return [{ label: 'Ofertas' }];
         if (activeCategory === 'Todos') return [{ label: 'Catálogo' }];
         
         return [
-            { label: 'Catálogo', href: '/productos' }, // Con link para volver
-            { label: activeCategory }                  // Texto plano (donde estoy)
+            { label: 'Catálogo', href: '/productos' }, 
+            { label: activeCategory }                  
         ];
     }, [isOffersRoute, activeCategory, searchTerm]);
 
@@ -134,12 +122,13 @@ const Products: React.FC = () => {
     return (
         <div className="flex flex-col animate-in fade-in duration-500 pb-16">
 
-            {/* 1. BREADCRUMBS SUTILES (Arriba de la barra) */}
-            <div className="max-w-360 mx-auto px-6 w-full pt-6 pb-4">
+            {/* 1. BREADCRUMBS SUTILES */}
+            {/* px-4 en mobile para alinear con la nueva grilla */}
+            <div className="max-w-360 mx-auto px-4 md:px-6 w-full pt-6 pb-4">
                 <Breadcrumbs items={breadcrumbItems} />
             </div>
 
-            {/* FILTER BAR (Sticky, contiene el H1 */}
+            {/* FILTER BAR (Sticky) */}
             <FilterBar 
                 title={pageTitle}
                 sortBy={sortBy}
@@ -148,9 +137,11 @@ const Products: React.FC = () => {
             />
 
             {/* CONTENEDOR PRINCIPAL: Sidebar + Grid */}
-            <div className="max-w-360 mx-auto px-6 w-full flex flex-col md:flex-row gap-12 mt-8">
+            {/* CAMBIO ACÁ: px-4 en mobile, px-6 en desktop. Acá el padre es el único que da padding */}
+            <div className="max-w-360 mx-auto px-4 md:px-6 w-full flex flex-col lg:flex-row gap-12 mt-8">
+                
                 {/* SIDEBAR DE FILTROS (IZQUIERDA - Solo PC) */}
-                <aside className="hidden md:block w-64 shrink-0 sticky top-44 self-start max-h-[calc(100vh-14rem)] overflow-y-auto no-scrollbar pb-8 pr-4">
+                <aside className="hidden lg:block w-64 shrink-0 sticky top-44 self-start max-h-[calc(100vh-14rem)] overflow-y-auto no-scrollbar pb-8 pr-4">
                     <FilterSidebar 
                         activeFilters={{ sizeFilter, colorFilter, priceFilter, searchTerm }}
                         onFilterChange={handleFilterChange}
@@ -163,22 +154,18 @@ const Products: React.FC = () => {
                     <ProductGrid 
                         products={filteredProducts} 
                         onQuickView={handleQuickView}
+                        layoutMode="catalog"
                     />
                 </main>
             </div>
 
-            {/* --- DRAWER DE FILTROS EXCLUSIVO MOBILE --- */}
-            <div className={`fixed inset-0 z-50 flex md:hidden ${isMobileFiltersOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
-                
-                {/* 1. Backdrop / Fondo oscuro (Aparece con Fade In) */}
+            {/* --- DRAWER DE FILTROS EXCLUSIVO MOBILE Y TABLET --- */}
+            <div className={`fixed inset-0 z-50 flex lg:hidden ${isMobileFiltersOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
                 <div 
                     className={`absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer ui-backdrop ${isMobileFiltersOpen ? 'is-open' : ''}`} 
                     onClick={() => setIsMobileFiltersOpen(false)}
                 />
-                
-                {/* 2. Panel lateral estilo brutalista (Entra con Slide Left) */}
                 <div className={`absolute top-0 left-0 h-full w-4/5 max-w-75 bg-white shadow-2xl flex flex-col ui-slide-panel ui-slide-left ${isMobileFiltersOpen ? 'is-open' : ''}`}>
-                    
                     <div className="flex items-center justify-between p-6 border-b border-gray-100">
                         <h2 className="text-xl font-black uppercase tracking-tighter">Filtros</h2>
                         <button 
@@ -188,8 +175,6 @@ const Products: React.FC = () => {
                             <i className="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    
-                    {/* El mismo FilterSidebar que usamos en PC, pero adentro del Drawer */}
                     <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
                         <FilterSidebar 
                             activeFilters={{ sizeFilter, colorFilter, priceFilter, searchTerm }}
@@ -198,8 +183,6 @@ const Products: React.FC = () => {
                             onCloseMobile={() => setIsMobileFiltersOpen(false)}
                         />
                     </div>
-
-                    {/* Botón para aplicar y cerrar */}
                     <div className="p-6 border-t border-gray-100">
                         <button 
                             onClick={() => setIsMobileFiltersOpen(false)}
