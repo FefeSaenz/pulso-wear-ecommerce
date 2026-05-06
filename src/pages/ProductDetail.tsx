@@ -184,7 +184,7 @@ const ProductDetail: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-20">
           
           {/* 1. VISTA MOBILE / TABLET (Slider con Dots y Flechas) */}
-          <div className="lg:hidden w-full md:max-w-[500px] md:mx-auto flex flex-col relative">
+          <div className="lg:hidden w-full md:max-w-125 md:mx-auto flex flex-col relative">
             
             {/* Etiqueta de Oferta Superpuesta */}
             {(product.discount_percentage || (product.original_price && product.original_price > product.price)) ? (
@@ -265,7 +265,7 @@ const ProductDetail: React.FC = () => {
           {/* ========================================== */}
           {/* AJUSTE NOTEBOOK: Limitamos el ancho max a 480px en lg para que la foto no explote en pantallas 720p, 
               pero vuelve a estar libre (xl:max-w-none) para tu monitor 4K. */}
-          <div className="hidden lg:flex w-full lg:w-1/2 lg:max-w-[480px] xl:max-w-none flex-row gap-6">
+          <div className="hidden lg:flex w-full lg:w-1/2 lg:max-w-120 xl:max-w-none flex-row gap-6">
             
             {/* Miniaturas (Verticales) */}
             {product.images && product.images.length > 0 && (

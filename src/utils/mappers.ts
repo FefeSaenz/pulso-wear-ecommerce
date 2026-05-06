@@ -73,7 +73,7 @@ export const mapApiDressToProduct = (apiDress: ApiDress): Product => {
     price: apiDress.dress_price,
     original_price: null,
     discount_percentage: null,
-    images: [apiDress.dress_picture], 
+    images: apiDress.dress_pictures || [],
     category: apiDress.category_name,
     base_sku: apiDress.dress_sku,
     brand: apiDress.brand_name,

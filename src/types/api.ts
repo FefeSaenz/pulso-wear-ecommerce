@@ -52,7 +52,7 @@ export interface ApiDress {
   dress_brand: number;
   dress_price: number;
   dress_highlight: number | null; // 1 = Destacado
-  dress_picture: string;
+  dress_pictures: string[];
   brand_name: string;
   category_name: string;
   category_abbreviation: string;

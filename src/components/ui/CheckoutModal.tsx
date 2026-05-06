@@ -143,7 +143,16 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
       };
 
       try {
-        const response = await api.post('/shop/cart/', newOrder);
+        // 1. ENVOLVEMOS EL PEDIDO EN LA PROPIEDAD "cart" Y LO PASAMOS A STRING
+        const payload = JSON.stringify({ cart: newOrder });
+
+        // 2. LO ENVIAMOS AVISANDO QUE EL FORMATO ES JSON
+        const response = await api.post('/shop/checkout/', payload, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
         // Usamos el ID real que devuelve tu compañero desde el Backend
         const orderIdGenerado = response.data?.id || `TEMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
         

@@ -156,7 +156,8 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Diseño de Filtros "Stacked":** Evolución del componente `FilterBar` para dispositivos móviles y tablets. Se apiló el Título de sección por sobre los botones de "Filtrar/Ordenar" manteniéndolo *Sticky*, para garantizar contexto de navegación constante sin robar espacio vital de pantalla.
 - [x] **Arquitectura Híbrida en PDP:** Rediseño total de la Product Detail Page. En mobile/tablet funciona como un Slider Nativo con indicadores de progreso (Dots) y flechas de navegación por hardware (`useRef`); mientras que en Desktop mantiene la experiencia editorial de Galería y foto gigante estática.
 - [x] **Prevención de Layout Shifts (PDP):** Implementación defensiva de `w-full` en contenedores y grillas usando flexbox. El esqueleto de la página ahora reserva el espacio geométrico correcto antes de que las imágenes pesadas terminen su carga asíncrona, evitando colapsos iniciales de la UI.
-
+- [x] **Integración de Órdenes (Wrapper Payload):** Adaptación exitosa de la petición POST del Checkout. Se envolvió el objeto de la orden dentro de una propiedad raíz (`cart`) y se forzó su serialización (`JSON.stringify`) con cabeceras `application/json` estrictas para cumplir con el contrato exacto del backend.
+- [x] **Refactorización de Interfaces (API Sync):** Actualización ágil de los Types y Mappers del frontend (transición a arreglos en `dress_pictures`) para absorber cambios estructurales en la base de datos del servidor en tiempo real, sin romper el renderizado de la UI.
 
 ## 🛠️ Próximos Pasos
 - [ ] **Conexión Real de OrderSuccess:** Eliminar el mock temporal de la pantalla de éxito y vincular el GET a la URL definitiva del backend para traer los datos vivos del pedido.
