@@ -110,8 +110,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
       
       // Mapeamos el carrito y le extirpamos la propiedad 'variants' a cada producto
       const cleanedItems = cart.map((item) => {
-        const { variants, ...cleanItem } = item as CartItem & { variants?: unknown }; 
-        return cleanItem;
+        return {
+          article_id: parseInt(item.id), // ID del producto genérico
+          variant_id: item.variant_id, // El ID de la variante exacta (Talle+Color)
+          quantity: item.quantity,
+          price: item.price
+        };
       });
 
       const newOrder: Order = {
@@ -143,15 +147,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
       };
 
       try {
-        // 1. ENVOLVEMOS EL PEDIDO EN LA PROPIEDAD "cart" Y LO PASAMOS A STRING
-        const payload = JSON.stringify({ cart: newOrder });
-
-        // 2. LO ENVIAMOS AVISANDO QUE EL FORMATO ES JSON
-        const response = await api.post('/shop/checkout/', payload, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
+        // LO ENVIAMOS AVISANDO QUE EL FORMATO ES JSON
+        const response = await api.post('/shop/checkout/', newOrder);
         
         // Usamos el ID real que devuelve tu compañero desde el Backend
         const orderIdGenerado = response.data?.id || `TEMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;

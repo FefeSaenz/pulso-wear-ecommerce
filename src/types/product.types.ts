@@ -6,6 +6,7 @@
 export interface ProductSize {
   size: string | number;
   sku: string;
+  variant_id?: number;
   stock: number;
   available: boolean;
 }
@@ -51,7 +52,7 @@ export interface CartItem extends Omit<Product, 'variants'> {
   selectedSize: string;
   selectedColor: string;
   selectedImage: string;
-  //variant_sku: string;
+  variant_id?: number;
 }
 
 /**
@@ -109,5 +110,10 @@ export interface Order {
     tracking_number?: string; // Lo completa el de gestión después
   };
 
-  items: CartItem[];
+  items: Array<{
+    article_id: number;
+    variant_id: number | undefined;
+    quantity: number;
+    price: number;
+  }>;
 }

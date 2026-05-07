@@ -95,6 +95,12 @@ const ProductDetail: React.FC = () => {
     }
     
     if (product) {
+      // Buscamos la variante exacta que eligió el usuario
+      const chosenVariantGroup = product.variants.find(v => v.color.name === selectedColor);
+      const chosenSizeObj = chosenVariantGroup?.sizes.find(s => s.size.toString() === selectedSize);
+      
+      const variantIdentifier = chosenSizeObj?.variant_id;
+
       const cartItem = {
         id: product.id,
         slug: product.slug,
@@ -114,7 +120,8 @@ const ProductDetail: React.FC = () => {
         quantity: 1,
         selectedSize: selectedSize,
         selectedColor: selectedColor,
-        selectedImage: mainImage || (product.images.length > 0 ? product.images[0] : '')
+        selectedImage: mainImage || (product.images.length > 0 ? product.images[0] : ''),
+        variant_id: variantIdentifier
       };
 
       addToCart(cartItem); 

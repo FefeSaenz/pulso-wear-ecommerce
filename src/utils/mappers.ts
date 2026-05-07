@@ -51,9 +51,9 @@ export const mapApiDressToProduct = (apiDress: ApiDress): Product => {
       groupedVariants[colorKey].sizes.push({
         size: v.variant_size,
         sku: v.variant_sku || apiDress.dress_sku,
+        // Agregamos el ID único de la variante que nos manda el backend:
+        variant_id: v.variant_bound, 
         stock: v.variant_stock !== null ? v.variant_stock : 99,
-        // Si el backend manda null, se asume stock infinito.
-        // Cuando en el futuro manden 0, available será false y la UI tachará el botón.
         available: v.variant_stock === null || v.variant_stock > 0, 
       });
     });
