@@ -15,76 +15,11 @@ const OrderSuccess: React.FC = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        // --- CÓDIGO REAL (COMENTADO POR AHORA) ---
-        // const response = await api.get(`/shop/cart/${id}`);
-        // setOrder(response.data);
-
-        // --- CÓDIGO MOCK (DE PRUEBA) ---
-        setTimeout(() => {
-          setOrder({
-            id: id || 'PULSO-999',
-            date: new Date().toISOString(),
-            status: 'Procesando',
-            customer: {
-              email: 'cliente@ejemplo.com',
-              name: 'Federico Sáenz',
-              phone: '3435555555',
-              dni_cuit: '35123456'
-            },
-            summary: {
-              subtotal: 45000,
-              shipping: 0,
-              discount: 4500,
-              total: 40500
-            },
-            payment: {
-              method: 'Transferencia',
-              status: 'pending'
-            },
-            shipping: {
-              method: 'Standard',
-              address: 'Calle Falsa 123',
-              city: 'Paraná',
-              zip: '3100'
-            },
-            items: [
-              {
-                id: 'prod-1',
-                slug: 'remera-oversize-black',
-                name: 'Remera Oversize Black',
-                description: 'Remera de algodón 100% premium.',
-                price: 25000,
-                original_price: null,
-                discount_percentage: null,
-                images: ['https://via.placeholder.com/150/000000/FFFFFF?text=PULSO'],
-                category: 'Remeras',
-                active: true,
-                quantity: 1,
-                selectedSize: 'L',
-                selectedColor: 'Black',
-                selectedImage: 'https://via.placeholder.com/150/000000/FFFFFF?text=PULSO'
-              },
-              {
-                id: 'prod-2',
-                slug: 'gorra-trucker-logo',
-                name: 'Gorra Trucker Logo',
-                description: 'Gorra clásica con logo bordado.',
-                price: 20000,
-                original_price: null,
-                discount_percentage: null,
-                images: ['https://via.placeholder.com/150/111111/FFFFFF?text=GORRA'],
-                category: 'Accesorios',
-                active: true,
-                quantity: 1,
-                selectedSize: 'Único',
-                selectedColor: 'Black/White',
-                selectedImage: 'https://via.placeholder.com/150/111111/FFFFFF?text=GORRA'
-              }
-            ]
-          });
-          setLoading(false);
-        }, 1500); // Tarda 1.5 segundos simulando la red
-        
+        // LLAMADA REAL A LA API
+        // Nota: Confirmá con tu backend si la ruta exacta es /shop/cart/, /shop/order/ o /shop/checkout/
+        const response = await api.get(`/shop/cart/${id}`);
+        setOrder(response.data);
+        setLoading(false);
       } catch (err) {
         console.error("Error al traer la orden:", err);
         setError(true);
@@ -118,7 +53,7 @@ const OrderSuccess: React.FC = () => {
         <i className="fa-solid fa-triangle-exclamation text-4xl mb-4 text-red-500"></i>
         <h1 className="text-2xl font-black uppercase tracking-tighter mb-2">Pedido no encontrado</h1>
         <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-8">No pudimos cargar los datos de la orden #{id}.</p>
-        <Link to="/" className="bg-black text-white px-8 py-4 text-[10px] font-black uppercase tracking-[3px] hover:bg-gray-800 transition-colors">
+        <Link to="/" className="bg-black text-white px-8 py-4 text-[10px] font-black uppercase tracking-[3px] hover:bg-gray-800 transition-colors cursor-pointer">
           Volver a la tienda
         </Link>
       </div>
@@ -139,14 +74,14 @@ const OrderSuccess: React.FC = () => {
         </p>
       </div>
 
-      {/* CAJA DE DETALLES (Brutalista) */}
+      {/* CAJA DE DETALLES */}
       <div className="border border-gray-200 p-6 md:p-10 rounded-sm mb-8">
         
         {/* ESTADO Y FECHA */}
         <div className="flex flex-col md:flex-row justify-between pb-6 border-b border-gray-100 mb-6 gap-4">
           <div>
             <p className="text-[9px] font-black uppercase tracking-[2px] text-gray-400 mb-1">Estado</p>
-            <span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
+            <span className={`inline-block px-3 py-1 text-[10px] font-black uppercase tracking-widest ${order.status === 'Procesando' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}`}>
               {order.status}
             </span>
           </div>
@@ -181,11 +116,12 @@ const OrderSuccess: React.FC = () => {
             {order.items.map((item, index) => (
               <div key={index} className="flex justify-between items-center bg-gray-50 p-4 border border-gray-100">
                 <div className="flex items-center space-x-4">
-                  <img src={item.selectedImage || item.images[0]} alt={item.name} className="w-12 h-12 object-cover border border-gray-200" />
+                  {/* Acá aplicamos el ?. para evitar errores si no hay imagen */}
+                  <img src={item.selectedImage || item.images?.[0]} alt={item.name} className="w-12 h-12 object-cover border border-gray-200" />
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-black">{item.name}</p>
                     <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                      {item.selectedColor} | Talle {item.selectedSize} | Cant: {item.quantity}
+                      {item.selectedColor || 'N/A'} | Talle {item.selectedSize || 'N/A'} | Cant: {item.quantity}
                     </p>
                   </div>
                 </div>

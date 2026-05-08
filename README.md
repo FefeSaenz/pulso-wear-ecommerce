@@ -159,14 +159,14 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Integración de Órdenes (Wrapper Payload):** Adaptación exitosa de la petición POST del Checkout. Se envolvió el objeto de la orden dentro de una propiedad raíz (`cart`) y se forzó su serialización (`JSON.stringify`) con cabeceras `application/json` estrictas para cumplir con el contrato exacto del backend.
 - [x] **Refactorización de Interfaces (API Sync):** Actualización ágil de los Types y Mappers del frontend (transición a arreglos en `dress_pictures`) para absorber cambios estructurales en la base de datos del servidor en tiempo real, sin romper el renderizado de la UI.
 - [x] **Trazabilidad de Stock (Variant-Aware Cart):** Refactorización profunda del flujo de compra para soportar identificadores únicos por variante matemática (`variant_id`). El sistema ahora lee el dato crudo de la API, lo inyecta dinámicamente según la intersección de Talle/Color seleccionada por el usuario en la PDP, y sanitiza el payload final en el Checkout. Se envía una matriz estrictamente optimizada (`article_id`, `variant_id`, `quantity`, `price`) que garantiza el descuento exacto de inventario en la base de datos del backend sin sobrecarga de red.
-- **Flujo de Autenticación (OTP):** Integración de login *passwordless* contra `/shop/auth/` y `/shop/verify/`, incluyendo temporizador de expiración y guardado seguro del JWT.
-- **Corrección de Payload (Variantes):** Ajuste en el mapeo de productos para enviar el `variant_id` exacto (talle/color) al backend, independizándolo del `article_id` base.
-- **Contrato de Órdenes (Front/Back):** Estandarización de la interfaz `Order` para el checkout, asegurando el envío de JSON crudo y la recepción de datos hidratados (`name`, `selectedImage`) para el historial del usuario.
+- [x] **Flujo de Autenticación (OTP):** Integración de login *passwordless* contra `/shop/auth/` y `/shop/verify/`, incluyendo temporizador de expiración y guardado seguro del JWT.
+- [x] **Corrección de Payload (Variantes):** Ajuste en el mapeo de productos para enviar el `variant_id` exacto (talle/color) al backend, independizándolo del `article_id` base.
+- [x] **Contrato de Órdenes (Front/Back):** Estandarización de la interfaz `Order` para el checkout, asegurando el envío de JSON crudo y la recepción de datos hidratados (`name`, `selectedImage`) para el historial del usuario.
+- [x] **Vistas Dinámicas (Order Success):** Eliminación de datos *mock* y conexión de la pantalla de confirmación con el endpoint real del backend, renderizando el ticket dinámicamente con las selecciones exactas del usuario (talle, color y metadatos visuales).
 
 
 ## 🛠️ Próximos Pasos
-- [ ] **Conexión Real de OrderSuccess:** Eliminar el mock temporal de la pantalla de éxito y vincular el GET a la URL definitiva del backend para traer los datos vivos del pedido.
-- [ ] **Pruebas de Integración (E2E):** Realizar una compra de prueba completa desde el front (agregar al carrito, llenar checkout, confirmar) monitoreando la respuesta exacta del backend para ajustar los IDs y tokens definitivos.
-- [ ] **Silent Login & OTP:** Interceptar el JWT del backend para guardarlo en LocalStorage.
-- [ ] **Autenticación (Autenticación Google/JWT):** Implementar el login de usuarios para reemplazar el `GUEST_ID` temporal y vincular las órdenes directamente con las cuentas reales de los clientes.
-- [ ] **Integración con Pasarela de Pagos:** Conectar el paso 2 del checkout con la API de Mercado Pago (o similar) para procesar transacciones reales.
+- [ ] Testeo de Flujo E2E (Producción): Realizar una compra de prueba completa en el servidor real para verificar la persistencia de la orden y la correcta respuesta del JSON hidratado.
+- [ ] Validación de Login OTP: Confirmar la recepción real de los correos y la validación de tokens JWT en el servidor de producción.
+- [ ] Manejo de Expiración de Sesión: Implementar un interceptor de respuesta que detecte errores 401 (Unauthorized) para limpiar el localStorage y redirigir al login automáticamente.
+- [ ] Integración con Pasarela de Pagos: Conectar el paso de pago del checkout con la API de Mercado Pago para procesar transacciones reales.
