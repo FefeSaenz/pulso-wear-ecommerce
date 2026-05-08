@@ -159,6 +159,10 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Integración de Órdenes (Wrapper Payload):** Adaptación exitosa de la petición POST del Checkout. Se envolvió el objeto de la orden dentro de una propiedad raíz (`cart`) y se forzó su serialización (`JSON.stringify`) con cabeceras `application/json` estrictas para cumplir con el contrato exacto del backend.
 - [x] **Refactorización de Interfaces (API Sync):** Actualización ágil de los Types y Mappers del frontend (transición a arreglos en `dress_pictures`) para absorber cambios estructurales en la base de datos del servidor en tiempo real, sin romper el renderizado de la UI.
 - [x] **Trazabilidad de Stock (Variant-Aware Cart):** Refactorización profunda del flujo de compra para soportar identificadores únicos por variante matemática (`variant_id`). El sistema ahora lee el dato crudo de la API, lo inyecta dinámicamente según la intersección de Talle/Color seleccionada por el usuario en la PDP, y sanitiza el payload final en el Checkout. Se envía una matriz estrictamente optimizada (`article_id`, `variant_id`, `quantity`, `price`) que garantiza el descuento exacto de inventario en la base de datos del backend sin sobrecarga de red.
+- **Flujo de Autenticación (OTP):** Integración de login *passwordless* contra `/shop/auth/` y `/shop/verify/`, incluyendo temporizador de expiración y guardado seguro del JWT.
+- **Corrección de Payload (Variantes):** Ajuste en el mapeo de productos para enviar el `variant_id` exacto (talle/color) al backend, independizándolo del `article_id` base.
+- **Contrato de Órdenes (Front/Back):** Estandarización de la interfaz `Order` para el checkout, asegurando el envío de JSON crudo y la recepción de datos hidratados (`name`, `selectedImage`) para el historial del usuario.
+
 
 ## 🛠️ Próximos Pasos
 - [ ] **Conexión Real de OrderSuccess:** Eliminar el mock temporal de la pantalla de éxito y vincular el GET a la URL definitiva del backend para traer los datos vivos del pedido.

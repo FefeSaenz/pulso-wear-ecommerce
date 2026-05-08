@@ -115,5 +115,8 @@ export interface Order {
     variant_id: number | undefined;
     quantity: number;
     price: number;
+    name?: string;
+    selectedImage?: string;
+    images?: string[];
   }>;
 }

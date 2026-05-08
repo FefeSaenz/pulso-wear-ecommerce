@@ -52,7 +52,7 @@ export const mapApiDressToProduct = (apiDress: ApiDress): Product => {
         size: v.variant_size,
         sku: v.variant_sku || apiDress.dress_sku,
         // Agregamos el ID único de la variante que nos manda el backend:
-        variant_id: v.variant_bound, 
+        variant_id: v.variant_id, 
         stock: v.variant_stock !== null ? v.variant_stock : 99,
         available: v.variant_stock === null || v.variant_stock > 0, 
       });

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Order } from '@/src/types/product.types';
 import { useAuth } from '@/src/context/AuthContext';
+import { requestLoginCode, verifyLoginCode } from '@/src/api/axios';
 import { toast } from 'sonner';
 import Price from './Price';
 
@@ -58,7 +59,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
     return `${m}:${s}`;
   };
 
-  const handleSendCode = async (e?: React.FormEvent) => {
+  const handleSendCode = async (e?: React.SyntheticEvent) => {
     if (e) e.preventDefault();
     if (!email || !email.includes('@')) {
       toast.error('Por favor, ingresá un email válido.');
@@ -67,14 +68,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
 
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setStep(2);
+      // LLAMADA REAL AL BACKEND
+      await requestLoginCode(email);
       
-      // --- 3. GUARDAMOS EL VENCIMIENTO EN EL DISCO DURO ---
-      const expirationTime = Date.now() + 120 * 1000; // Ahora + 2 minutos
+      setStep(2);
+      const expirationTime = Date.now() + 120 * 1000;
       localStorage.setItem('pulso_otp_end', expirationTime.toString());
       localStorage.setItem('pulso_otp_email', email);
-      
       setTimeLeft(120);
       setOtpCode(''); 
       toast.success('¡Código enviado! Revisá tu casilla.');
@@ -85,7 +85,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
     }
   };
 
-  const handleVerifyCode = async (e: React.FormEvent) => {
+  const handleVerifyCode = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (otpCode.length < 6) {
       toast.error('Ingresá el código completo de 6 dígitos.');
@@ -94,12 +94,15 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
 
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const fakeToken = `JWT-PULSO-${Math.random().toString(36).substring(2)}`;
+      // LLAMADA REAL AL BACKEND VERIFICANDO CÓDIGO
+      const response = await verifyLoginCode(email, otpCode);
       
-      login({ email, token: fakeToken });
+      // Asumimos que tu backend devuelve { token: "..." }
+      // Si la variable se llama distinto (ej: response.data.access_token), cambialo acá:
+      const realToken = response.data.token; 
       
-      // --- 4. LIMPIEZA POST-LOGIN ---
+      login({ email, token: realToken });
+      
       localStorage.removeItem('pulso_otp_end');
       localStorage.removeItem('pulso_otp_email');
       
@@ -107,7 +110,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
       setStep(1); 
       setOtpCode('');
     } catch (error) {
-      toast.error('Código incorrecto. Intentá nuevamente.');
+      toast.error('Código incorrecto o vencido.');
     } finally {
       setLoading(false);
     }
@@ -199,7 +202,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
                           {order.items.map((item, idx) => (
                             <img 
                               key={idx} 
-                              src={item.selectedImage || item.images[0]} 
+                              src={item.selectedImage || item.images?.[0]} 
                               className="w-10 h-10 object-cover rounded-full border-2 border-white shadow-sm"
                               alt={item.name}
                             />
