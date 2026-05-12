@@ -27,6 +27,23 @@ api.interceptors.request.use((config) => {
     return config;
 }, (error) => Promise.reject(error));
 
+// INTERCEPTOR DE RESPUESTAS (Manejo de errores)
+api.interceptors.response.use(
+    (response) => response, // Si todo sale bien, dejamos pasar la respuesta
+    (error) => {
+        // Si el backend nos patea porque el token venció o es inválido
+        if (error.response?.status === 401) {
+        console.warn("Sesión expirada. Limpiando credenciales...");
+        localStorage.removeItem('pulso_token');
+        localStorage.removeItem('pulso_email');
+        
+        // Redirige al inicio para forzar un nuevo login
+        window.location.href = '/';
+        }
+        return Promise.reject(error);
+    }
+);
+
 // Servicios de Tienda
 export const getFrontData = async (): Promise<ApiResponse['data']> => {
     const response = await api.get<ApiResponse>("/shop/page/");

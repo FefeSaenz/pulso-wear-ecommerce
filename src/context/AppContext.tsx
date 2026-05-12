@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { getFrontData } from '../api/axios';
 import { Product } from '../types/product.types';
 import { mapApiDressToProduct, extractUniqueCategories } from '../utils/mappers';
-import { MenuItem } from '../types/api';
+import { MenuItem, ApiResponse } from '../types/api';
 
 interface AppContextType {
   allProducts: Product[];
@@ -11,7 +11,7 @@ interface AppContextType {
   logoText: string;
   loading: boolean;
   error: boolean;
-  frontConfig: any; // Mantenemos el tipado que pusiste
+  frontConfig: ApiResponse['data'] | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -55,7 +55,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [frontConfig, setFrontConfig] = useState<any>(null); // NUEVO ESTADO PARA BANNERS
+  const [frontConfig, setFrontConfig] = useState<ApiResponse['data'] | null>(null);
 
   useEffect(() => {
     const fetchInitialData = async () => {

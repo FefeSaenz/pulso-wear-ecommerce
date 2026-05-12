@@ -163,10 +163,11 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Corrección de Payload (Variantes):** Ajuste en el mapeo de productos para enviar el `variant_id` exacto (talle/color) al backend, independizándolo del `article_id` base.
 - [x] **Contrato de Órdenes (Front/Back):** Estandarización de la interfaz `Order` para el checkout, asegurando el envío de JSON crudo y la recepción de datos hidratados (`name`, `selectedImage`) para el historial del usuario.
 - [x] **Vistas Dinámicas (Order Success):** Eliminación de datos *mock* y conexión de la pantalla de confirmación con el endpoint real del backend, renderizando el ticket dinámicamente con las selecciones exactas del usuario (talle, color y metadatos visuales).
+- [x] **Manejo de Expiración de Sesión:** Implementación de un interceptor de respuesta en Axios para detectar errores 401 (Unauthorized), purgando credenciales del `localStorage` de forma automática para proteger la app.
+- [x] **Tipado Estricto (No-Any):** Refactorización de contratos de datos en el `AppContext`, reemplazando tipados dinámicos por interfaces estrictas (`ApiResponse['data']`) para asegurar la integridad de la UI.
 
 
 ## 🛠️ Próximos Pasos
 - [ ] Testeo de Flujo E2E (Producción): Realizar una compra de prueba completa en el servidor real para verificar la persistencia de la orden y la correcta respuesta del JSON hidratado.
 - [ ] Validación de Login OTP: Confirmar la recepción real de los correos y la validación de tokens JWT en el servidor de producción.
-- [ ] Manejo de Expiración de Sesión: Implementar un interceptor de respuesta que detecte errores 401 (Unauthorized) para limpiar el localStorage y redirigir al login automáticamente.
 - [ ] Integración con Pasarela de Pagos: Conectar el paso de pago del checkout con la API de Mercado Pago para procesar transacciones reales.
