@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Banner } from '@/src/types/api';
-
 
 interface HeroBannerProps {
   banners: Banner[];
@@ -9,19 +8,44 @@ interface HeroBannerProps {
 
 const HeroBanner: React.FC<HeroBannerProps> = ({ banners, onCtaClick }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  
+  const sliderRef = useRef<HTMLDivElement>(null);
 
-  // Funciones de navegación memorizadas para evitar re-renders
+  // --- 1. LÓGICA DE NAVEGACIÓN (Matemática Pura - cross-fade seamless) ---
+  const goToSlide = useCallback((index: number) => {
+    if (sliderRef.current) {
+      // Forzamos el scroll a la posición exacta. Let CSS Snap handle the rest.
+      sliderRef.current.scrollTo({ 
+        left: index * sliderRef.current.clientWidth, 
+        behavior: 'smooth' 
+      });
+      // Sincronizamos estado inmediatamente para evitar lags visuales en dots/textos
+      setCurrentIndex(index);
+    }
+  }, []);
+
   const nextSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % banners.length);
-  }, [banners.length]);
+    const nextIndex = (currentIndex + 1) % banners.length; // Modulo math for loop
+    goToSlide(nextIndex);
+  }, [currentIndex, banners.length, goToSlide]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
-  }, [banners.length]);
+    const prevIndex = (currentIndex - 1 + banners.length) % banners.length;
+    goToSlide(prevIndex);
+  }, [currentIndex, banners.length, goToSlide]);
 
-  // 1. TECLADO (Flechas Izquierda/Derecha)
+  // --- 2. SINCRONIZACIÓN DE SCROLL NATIVO (Solo para el dedo en mobile) ---
+  const handleScroll = () => {
+    if (sliderRef.current) {
+      const index = Math.round(sliderRef.current.scrollLeft / sliderRef.current.clientWidth);
+      if (index !== currentIndex) {
+        setCurrentIndex(index);
+      }
+    }
+  };
+
+  // --- 3. EVENTOS DE TECLADO ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') nextSlide();
@@ -31,62 +55,44 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ banners, onCtaClick }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextSlide, prevSlide]);
 
-  // 2. AUTO-PLAY (Se pausa si el usuario interactúa
-  useEffect(() => {
-    if (!banners || banners.length <= 1) return;
-    const timer = setInterval(nextSlide, 5000);
-    return () => clearInterval(timer);
-  }, [nextSlide, banners.length]);
+  // --- !!! ELIMINADO: RIP setInterval logic !!! ---
+  // Ya no dependemos de un timer JS desfasado.
 
-  // 3. GESTOS TÁCTILES (Swipe)
-  const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.targetTouches[0].clientX);
-  const handleTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
-
-  const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe) nextSlide();
-    if (isRightSwipe) prevSlide();
-
-    setTouchStart(null);
-    setTouchEnd(null);
-  };
-  
   if (!banners || banners.length === 0) return null;
   const currentBanner = banners[currentIndex];
 
   return (
     <section 
-      className="relative h-[85vh] w-full overflow-hidden bg-black group touch-pan-y"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      className="relative h-[85vh] w-full overflow-hidden bg-black group"
+      // Estos eventos solo controlan el estado CSS de pausa, no la lógica JS
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
-      {/*IMAGENES CON FADE DENTRO DEL HERO*/}
-      {banners.map((banner, index) => (
-        <div
-          key={banner.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
-          }`}
-        >
-          <img 
-            src={banner.image} 
-            alt={banner.title}
-            className={`w-full h-full object-cover opacity-60  ${
-              index === currentIndex ? 'animate-ken-burns' : ''
-            }`}
-            
-          />
-        </div>
-      ))}
+      <div 
+        ref={sliderRef}
+        onScroll={handleScroll}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setIsPaused(false)}
+        // md:overflow-x-hidden para el fix de la ruedita del mouse
+        className="flex w-full h-full overflow-y-hidden overflow-x-auto md:overflow-x-hidden snap-x snap-mandatory no-scrollbar"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {banners.map((banner, index) => (
+          <div key={banner.id} className="w-full h-full shrink-0 snap-start relative">
+            <img 
+              src={banner.image} 
+              alt={banner.title}
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding="async"
+              className={`w-full h-full object-cover opacity-60 ${
+                index === currentIndex ? 'animate-ken-burns' : ''
+              }`}
+            />
+          </div>
+        ))}
+      </div>
 
-      {/* CONTENIDO CENTRAL, con Key dinámico para reiniciar animación al cambiar */}
       <div key={currentIndex} className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6 z-10 pointer-events-none">
-        
         <p className="text-[10px] md:text-[12px] font-black uppercase tracking-[6px] mb-4 animate-in fade-in slide-in-from-bottom duration-500">
           {currentBanner.subtitle}
         </p>
@@ -100,26 +106,47 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ banners, onCtaClick }) => {
         >
           {currentBanner.cta.text || 'Explorar'}
         </button>
-        
       </div>
       
-      {/* INDICADORES (DOTS INTERACTIVOS) - Centrados abajo */}
+      {/* INDICADORES (DOTS CON LÓGICA DE TIEMPO UNIFICADA - SINGLE TRUTH) */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex space-x-3 z-30">
-        {banners.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className="group py-4 px-1" // Área de click más grande para mobile
-            aria-label={`Ir al banner ${index + 1}`}
-          >
-            <div className={`h-0.5 transition-all duration-500 ${
-              index === currentIndex ? 'w-12 bg-white' : 'w-4 bg-white/30 group-hover:bg-white/60'
-            }`} />
-          </button>
-        ))}
+        {banners.map((_, index) => {
+          const isActive = index === currentIndex;
+          return (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className="group py-4 px-1 cursor-pointer" 
+              aria-label={`Ir al banner ${index + 1}`}
+            >
+              <div className={`h-0.5 relative overflow-hidden transition-all duration-500 ${
+                isActive ? 'w-12 bg-white/30' : 'w-4 bg-white/30 group-hover:bg-white/60'
+              }`}>
+                {isActive && (
+                  <div 
+                    key={`progress-${currentIndex}`} 
+                    className="absolute top-0 left-0 w-full h-full bg-white origin-left"
+                    style={{ 
+                      // 1. Usamos la animación de scaleX optimizada por GPU
+                      animation: 'fill-progress-transform 5s linear forwards',
+                      // 2. Controlamos la pausa con CSS
+                      animationPlayState: isPaused ? 'paused' : 'running'
+                    }} 
+                    // !!! 3. LA MAGIA SENIOR !!!
+                    // React escucha cuando la animación CSS de la GPU termina naturalmente,
+                    // y solo entonces dispara la lógica JS de cambiar el slide.
+                    // ¡Garantiza sincronización matemática perfecta!
+                    onAnimationEnd={() => {
+                      if (!isPaused) nextSlide(); // Seguridad: solo si no está pausado
+                    }}
+                  />
+                )}
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      {/* FLECHAS LATERALES (Solo visibles en Desktop hover) */}
       <button 
         onClick={prevSlide}
         className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 items-center justify-center border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
