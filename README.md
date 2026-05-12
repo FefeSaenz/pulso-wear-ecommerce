@@ -165,6 +165,8 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Vistas Dinámicas (Order Success):** Eliminación de datos *mock* y conexión de la pantalla de confirmación con el endpoint real del backend, renderizando el ticket dinámicamente con las selecciones exactas del usuario (talle, color y metadatos visuales).
 - [x] **Manejo de Expiración de Sesión:** Implementación de un interceptor de respuesta en Axios para detectar errores 401 (Unauthorized), purgando credenciales del `localStorage` de forma automática para proteger la app.
 - [x] **Tipado Estricto (No-Any):** Refactorización de contratos de datos en el `AppContext`, reemplazando tipados dinámicos por interfaces estrictas (`ApiResponse['data']`) para asegurar la integridad de la UI.
+- [x] **Sincronización GPU-JS (HeroBanner):** Refactorización del slider principal eliminando la dependencia clásica de `setInterval`. El *autoplay* ahora se sincroniza milimétricamente con el evento `onAnimationEnd` procesado por la placa de video, garantizando un loop infinito perfecto y transiciones a 60fps sin desfasajes de estado.
+- [x] **Optimización Extrema de DOM (Marquesina):** Reducción drástica de la carga de renderizado en el `AnnouncementBar`. Se reemplazó el mapeo múltiple de nodos HTML por un string contiguo procesado mediante `whitespace-pre`, logrando simetría tipográfica perfecta (kerning) con una huella en memoria casi nula.
 
 
 ## 🛠️ Próximos Pasos

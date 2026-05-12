@@ -22,6 +22,12 @@
   animation: ken-burns 8s ease-out forwards;
 }
 
+/* --- ANIMACIÓN MARQUESINA (ANNOUNCEMENT BAR) --- */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* --- ANIMACIÓN BARRA DE PROGRESO (HERO) --- */
 @keyframes fill-progress-transform {
   from { transform: scaleX(0); }
