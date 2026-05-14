@@ -45,6 +45,8 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - `Touch-First Optimization (Performance)`: Implementación de carruseles de productos utilizando exclusivamente CSS Scroll Snap nativo (sin librerías). Garantiza una experiencia de *swipe* editorial a 60fps en dispositivos móviles, eliminando el peso de JS adicional.
 - `Multi-Resolution Confinement (Pattern)`: Diseño de interfaces restringidas matemáticamente para el mundo real. Aplicación de topes dinámicos de ancho (`max-w-[480px]`) específicos para resoluciones estándar (1366x768 / 720p), que se liberan en monitores 4K, erradicando desbordamientos visuales.
 - `Delayed Auth & State Sync (Pattern)`: Implementación de un Checkout de Cero Fricción donde la autenticación OTP se exige en el último paso para maximizar la conversión. Utiliza un motor centralizado (`useOtpAuth`) que persiste su estado en el `localStorage`, logrando que componentes aislados (`CheckoutModal` y `UserProfile`) actúen como "espejos" sincronizados en tiempo real ante recargas (F5) o cierres accidentales.
+- `Smart Search Engine (Pattern)`: Implementación de un motor de búsqueda del lado del cliente utilizando técnicas ligeras de Procesamiento de Lenguaje Natural (NLP). El sistema aplica Normalización (eliminación de tildes/diacríticos), Tokenización (separación de frases en palabras clave) y Lematización básica (eliminación de plurales). Esto permite búsquedas tolerantes a errores ortográficos y cruces de metadatos (ej: buscar "remera blanca" filtra productos basados en nombre, categoría y arrays anidados de colores).
+- `Data-Driven UI (Pattern)`: Componentes presentacionales que autoconstruyen su contenido basándose en el análisis del estado global. El `SearchOverlay` procesa el catálogo en tiempo real (`useMemo`) para inyectar dinámicamente las 3 categorías con mayor stock como "Sugerencias de Búsqueda", erradicando el hardcoding.
 
 
 ## ✅ Logros y Avances
@@ -173,6 +175,8 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Sincronización Cruzada de Componentes:** Resolución del "Problema de Instancias Separadas" de React. El UserProfile y el CheckoutModal ahora leen y escriben del mismo estado global (`syncState()`), permitiendo que el usuario inicie el login en un panel y lo complete en el otro sin pérdida de contexto.
 - [x] **Seguridad y QA de Flujos de Pago:** Implementación de "Fricción Positiva" y manejo de Edge Cases extremos. Si el total del carrito cambia durante la validación OTP, el Checkout devuelve automáticamente al usuario al resumen de pago para exigir el consentimiento explícito del nuevo monto.
 - [x] **UX a prueba de bloqueos (Error Recovery):** Integración de rutas de escape visuales (botón "¿Escribiste mal tu correo?") para purgar el caché y liberar inputs bloqueados si el usuario comete un error de tipeo en el email inicial.
+- [x] **Motor de Búsqueda Inteligente (NLP):** Refactorización del algoritmo de búsqueda en `useProductFilters`. Pasó de un `includes` literal a un sistema tolerante a tildes, plurales y orden de palabras, buscando coincidencias en una matriz combinada de nombre, descripción y variables de color.
+- [x] **Sugerencias de Búsqueda Dinámicas:** Modificación del `SearchOverlay` para consumir el array global de productos (`unifiedProducts`). Ahora calcula matemáticamente el Top 3 de categorías con más stock y las renderiza como sugerencias rápidas.
 
 
 ## 🛠️ Próximos Pasos

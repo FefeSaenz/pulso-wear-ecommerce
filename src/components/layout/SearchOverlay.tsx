@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
+import { Product } from '@/src/types/product.types'; // Importamos el tipo
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -6,10 +7,38 @@ interface SearchOverlayProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onSearchSubmit: (value: string) => void;
+  products?: Product[]; // Nueva prop para recibir el catálogo
 }
 
-const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTerm, onSearchChange, onSearchSubmit }) => {
+const SearchOverlay: React.FC<SearchOverlayProps> = ({ 
+  isOpen, 
+  onClose, 
+  searchTerm, 
+  onSearchChange, 
+  onSearchSubmit,
+  products = [] // Default vacío para que no rompa si te olvidás de pasarlo
+}) => {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // --- LÓGICA DE SUGERENCIAS INTELIGENTES ---
+  const topCategories = useMemo(() => {
+    // Si todavía no cargaron los productos, mostramos un fallback genérico
+    if (!products.length) return ['Remeras', 'Pantalones', 'Buzos']; 
+
+    // 1. Contamos cuántos productos hay por cada categoría
+    const categoryCounts = products.reduce((acc, product) => {
+      if (product.category) {
+        acc[product.category] = (acc[product.category] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+
+    // 2. Convertimos el objeto en array, lo ordenamos de mayor a menor y sacamos el Top 3
+    return Object.entries(categoryCounts)
+      .sort((a, b) => b[1] - a[1]) 
+      .slice(0, 3) 
+      .map(entry => entry[0]); 
+  }, [products]);
 
   // 1. Lógica para cerrar con ESCAPE y buscar con ENTER
   useEffect(() => {
@@ -40,8 +69,6 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTe
     }
   }, [isOpen]);
 
-  //if (!isOpen) return null;
-
   return (
     <div className={`fixed inset-0 z-100 bg-white flex flex-col ui-fade-overlay ${isOpen ? 'is-open' : ''}`}>
       <div className="max-w-7xl mx-auto px-6 h-full flex flex-col w-full">
@@ -65,12 +92,23 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, searchTe
               placeholder="¿QUÉ ESTÁS BUSCANDO?"
               className="w-full text-2xl sm:text-4xl lg:text-7xl font-black uppercase tracking-tighter text-center outline-none border-none placeholder:text-gray-100"
             />
-            <div className="mt-8 flex justify-center space-x-4">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Sugerencias:</span>
-              <button onClick={() => onSearchSubmit('Remera')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer">Remeras</button>
-              <button onClick={() => onSearchSubmit('Pantalón')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer">Pantalones</button>
-              <button onClick={() => onSearchSubmit('Boxy')} className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer">Boxy Fit</button>
+            
+            {/* SUGERENCIAS INTELIGENTES RENDERIZADAS DINÁMICAMENTE */}
+            <div className="mt-8 flex justify-center items-center space-x-4">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                Sugerencias:
+              </span>
+              {topCategories.map((category) => (
+                <button 
+                  key={category}
+                  onClick={() => onSearchSubmit(category)} 
+                  className="text-[10px] font-black uppercase tracking-widest underline underline-offset-4 hover:text-gray-600 transition-colors cursor-pointer"
+                >
+                  {category}
+                </button>
+              ))}
             </div>
+
           </div>
         </div>
         

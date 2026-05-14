@@ -6,6 +6,25 @@ interface UseProductFiltersProps {
   searchTerm: string;
 }
 
+// --- HELPER FUNCTIONS PARA BÚSQUEDA INTELIGENTE ---
+// 1. Normalización: Saca tildes y pasa a minúsculas ("Pantalón" -> "pantalon")
+const normalizeText = (text?: string) => {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .normalize("NFD") 
+    .replace(/[\u0300-\u036f]/g, "") 
+    .trim();
+};
+
+// 2. Lematización Básica: Saca plurales ("remeras" -> "remera", "pantalones" -> "pantalon")
+const lemmatize = (word: string) => {
+  let w = word;
+  if (w.length > 3 && w.endsWith('es')) w = w.slice(0, -2);
+  else if (w.length > 2 && w.endsWith('s')) w = w.slice(0, -1);
+  return w;
+};
+
 /*
  * HOOK UNIVERSAL DE FILTRADO
  * Centraliza la lógica de búsqueda, categorías, talles, colores y ordenamiento.
@@ -23,7 +42,6 @@ export const useProductFilters = ({
   const [activeColor, setActiveColor] = useState<string | null>(null);
   const [activePrice, setActivePrice] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'default' | 'price-low' | 'price-high'>('default');
-  //const categories = ['Todos', 'Remeras', 'Pantalones', 'Buzos'];
 
   const categories = useMemo(() => 
     ['Todos', ...Array.from(new Set(products.map(p => p.category)))]
@@ -37,13 +55,22 @@ export const useProductFilters = ({
       result = result.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
     }
 
-    // 2. Filtro por Búsqueda (Search)
+    // 2. Filtro por Búsqueda Inteligente (Search)
     if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(p => 
-        p.name.toLowerCase().includes(term) || 
-        p.category.toLowerCase().includes(term) || (p.description?.toLowerCase().includes(term))
-      );
+      // Limpiamos la búsqueda ingresada por el usuario
+      const cleanSearchTerm = normalizeText(searchTerm);
+      
+      // La dividimos en palabras sueltas y le sacamos los plurales
+      const searchTokens = cleanSearchTerm.split(/\s+/).filter(Boolean).map(lemmatize);
+
+      result = result.filter(p => {
+        // Armamos un "súper string" con toda la info útil del producto (incluyendo colores)
+        const productColors = p.variants?.map(v => v.color.name).join(' ') || '';
+        const searchableText = normalizeText(`${p.name} ${p.category} ${p.description || ''} ${productColors}`);
+        
+        // El producto pasa el filtro solo si TODAS las palabras buscadas están en su info
+        return searchTokens.every(token => searchableText.includes(token));
+      });
     }
 
     // 3. Filtro por Talle (dentro de variants)

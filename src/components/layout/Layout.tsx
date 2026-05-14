@@ -16,9 +16,10 @@ import CheckoutModal from '@/src/components/ui/CheckoutModal';
 import UserProfile from '@/src/components/ui/UserProfile';
 import WhatsAppButton from '@/src/components/ui/WhatsAppButton';
 import TermsModal from '@/src/components/ui/TermsModal';
+import SearchOverlay from './SearchOverlay';
 
 import { Product } from '@/src/types/product.types';
-import SearchOverlay from './SearchOverlay';
+import { useUnifiedProducts } from '@/src/hooks/useUnifiedProducts';
 
 const Layout: React.FC = () => {
     const navigate = useNavigate();
@@ -30,6 +31,9 @@ const Layout: React.FC = () => {
         addToCart, updateQuantity, removeFromCart, 
         handleCheckoutComplete 
     } = useCart();
+
+    // Importo productos
+    const { unifiedProducts } = useUnifiedProducts();
 
     // --- ESTADOS GLOBALES DE UI ---
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -66,6 +70,7 @@ const Layout: React.FC = () => {
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 onSearchSubmit={handleSearch}
+                products={unifiedProducts}
             />
             
             <main className="grow">
