@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Order } from '@/src/types/product.types';
 import { useAuth } from '@/src/context/AuthContext';
-import { requestLoginCode, verifyLoginCode } from '@/src/api/axios';
+import { useOtpAuth } from '@/src/hooks/useOtpAuth'; // Importamos el hook
 import { toast } from 'sonner';
 import Price from './Price';
 
@@ -16,42 +16,25 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
   const { user, isAuthenticated, login, logout } = useAuth();
   
   const [step, setStep] = useState<1 | 2>(1); 
-  const [email, setEmail] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
+  
+  // LÓGICA DE OTP DENTRO DEL HOOK USEOTPAUTH
+  const { 
+    email, setEmail, otpCode, setOtpCode, loading, timeLeft, 
+    isCodeSent, sendOtp, verifyOtp, clearOtpData, syncState 
+  } = useOtpAuth();
 
-  // --- 1. EFECTO DE RECUPERACIÓN (Sobrevivir al F5) ---
+  // EFECTO MAESTRO: Si se abre el panel, obligamos a leer la verdad del localStorage
   useEffect(() => {
-    const savedEndTime = localStorage.getItem('pulso_otp_end');
-    const savedEmail = localStorage.getItem('pulso_otp_email');
-
-    if (savedEndTime && savedEmail) {
-      const remainingSeconds = Math.floor((parseInt(savedEndTime) - Date.now()) / 1000);
-      
-      if (remainingSeconds > 0) {
-        // Si hay tiempo, restauramos la pantalla del código
-        setEmail(savedEmail);
-        setStep(2);
-        setTimeLeft(remainingSeconds);
-      } else {
-        // Si el tiempo ya pasó mientras estaba cerrada la pestaña, limpiamos
-        localStorage.removeItem('pulso_otp_end');
-        localStorage.removeItem('pulso_otp_email');
-      }
+    if (isOpen) {
+      syncState();
     }
-  }, []); // Se ejecuta solo una vez al cargar
+  }, [isOpen, syncState]);
 
-  // --- 2. EFECTO DEL RELOJ (Resta 1 segundo a la vez) ---
+  // Si descubrimos que ya había un código enviado en otra pestaña/modal, pasamos al Paso 2
   useEffect(() => {
-    if (step !== 2 || timeLeft <= 0) return;
-    
-    const timerId = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1000);
-    
-    return () => clearInterval(timerId);
-  }, [timeLeft, step]);
+    if (isCodeSent) setStep(2);
+    else setStep(1);
+  }, [isCodeSent]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -65,65 +48,33 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
       toast.error('Por favor, ingresá un email válido.');
       return;
     }
-
-    setLoading(true);
-    try {
-      // LLAMADA REAL AL BACKEND
-      await requestLoginCode(email);
-      
+    // LLAMADA REAL AL BACKEND (delegada al hook)
+    const success = await sendOtp(email);
+    if (success) {
       setStep(2);
-      const expirationTime = Date.now() + 120 * 1000;
-      localStorage.setItem('pulso_otp_end', expirationTime.toString());
-      localStorage.setItem('pulso_otp_email', email);
-      setTimeLeft(120);
-      setOtpCode(''); 
-      toast.success('¡Código enviado! Revisá tu casilla.');
-    } catch (error) {
-      toast.error('Hubo un error al enviar el código.');
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleVerifyCode = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    if (otpCode.length < 6) {
-      toast.error('Ingresá el código completo de 6 dígitos.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // LLAMADA REAL AL BACKEND VERIFICANDO CÓDIGO
-      const response = await verifyLoginCode(email, otpCode);
-      
+    
+    // LLAMADA REAL AL BACKEND VERIFICANDO CÓDIGO (delegada al hook)
+    const token = await verifyOtp();
+    
+    if (token) {
       // Asumimos que tu backend devuelve { token: "..." }
-      // Si la variable se llama distinto (ej: response.data.access_token), cambialo acá:
-      const realToken = response.data.token; 
-      
-      login({ email, token: realToken });
-      
-      localStorage.removeItem('pulso_otp_end');
-      localStorage.removeItem('pulso_otp_email');
-      
+      login({ email, token });
       toast.success('¡Sesión iniciada con éxito!');
       setStep(1); 
-      setOtpCode('');
-    } catch (error) {
-      toast.error('Código incorrecto o vencido.');
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleLogout = () => {
     logout();
     setEmail('');
-    setOtpCode('');
     setStep(1);
     // Limpieza por las dudas
-    localStorage.removeItem('pulso_otp_end');
-    localStorage.removeItem('pulso_otp_email');
+    clearOtpData();
     toast.success('Sesión cerrada.');
   };
 
@@ -294,8 +245,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
                       type="button"
                       onClick={() => {
                         setStep(1);
-                        localStorage.removeItem('pulso_otp_end');
-                        localStorage.removeItem('pulso_otp_email');
+                        clearOtpData();
                       }}
                       className="px-6 border border-gray-200 text-gray-500 hover:text-black transition-colors cursor-pointer"
                     >

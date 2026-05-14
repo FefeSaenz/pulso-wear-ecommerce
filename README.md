@@ -44,6 +44,7 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - `Responsive Breakpoint Shifting (Pattern)`: Interfaces adaptativas que alteran su estructura arquitectónica —no solo su tamaño— según el dispositivo. Por ejemplo, mutar de un Sidebar lateral en Desktop a un Drawer Modal asíncrono en Mobile y Tablet, asegurando la mejor conversión en cada formato.
 - `Touch-First Optimization (Performance)`: Implementación de carruseles de productos utilizando exclusivamente CSS Scroll Snap nativo (sin librerías). Garantiza una experiencia de *swipe* editorial a 60fps en dispositivos móviles, eliminando el peso de JS adicional.
 - `Multi-Resolution Confinement (Pattern)`: Diseño de interfaces restringidas matemáticamente para el mundo real. Aplicación de topes dinámicos de ancho (`max-w-[480px]`) específicos para resoluciones estándar (1366x768 / 720p), que se liberan en monitores 4K, erradicando desbordamientos visuales.
+- `Delayed Auth & State Sync (Pattern)`: Implementación de un Checkout de Cero Fricción donde la autenticación OTP se exige en el último paso para maximizar la conversión. Utiliza un motor centralizado (`useOtpAuth`) que persiste su estado en el `localStorage`, logrando que componentes aislados (`CheckoutModal` y `UserProfile`) actúen como "espejos" sincronizados en tiempo real ante recargas (F5) o cierres accidentales.
 
 
 ## ✅ Logros y Avances
@@ -167,6 +168,11 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Tipado Estricto (No-Any):** Refactorización de contratos de datos en el `AppContext`, reemplazando tipados dinámicos por interfaces estrictas (`ApiResponse['data']`) para asegurar la integridad de la UI.
 - [x] **Sincronización GPU-JS (HeroBanner):** Refactorización del slider principal eliminando la dependencia clásica de `setInterval`. El *autoplay* ahora se sincroniza milimétricamente con el evento `onAnimationEnd` procesado por la placa de video, garantizando un loop infinito perfecto y transiciones a 60fps sin desfasajes de estado.
 - [x] **Optimización Extrema de DOM (Marquesina):** Reducción drástica de la carga de renderizado en el `AnnouncementBar`. Se reemplazó el mapeo múltiple de nodos HTML por un string contiguo procesado mediante `whitespace-pre`, logrando simetría tipográfica perfecta (kerning) con una huella en memoria casi nula.
+- [x] **Checkout "Cero Fricción" (Delayed Auth):** Refactorización del CheckoutModal para permitir a usuarios no registrados completar la configuración de envío y método de pago, solicitando la autenticación (OTP) de forma inmersiva como un paso final transparente.
+- [x] **Motor OTP Centralizado & Resiliente:** Abstracción de la lógica de autenticación en el hook `useOtpAuth`. El sistema ahora guarda timestamps temporales en el disco duro, permitiendo que la cuenta regresiva de 120s y el ingreso de pines sobrevivan a refrescos completos de página (F5).
+- [x] **Sincronización Cruzada de Componentes:** Resolución del "Problema de Instancias Separadas" de React. El UserProfile y el CheckoutModal ahora leen y escriben del mismo estado global (`syncState()`), permitiendo que el usuario inicie el login en un panel y lo complete en el otro sin pérdida de contexto.
+- [x] **Seguridad y QA de Flujos de Pago:** Implementación de "Fricción Positiva" y manejo de Edge Cases extremos. Si el total del carrito cambia durante la validación OTP, el Checkout devuelve automáticamente al usuario al resumen de pago para exigir el consentimiento explícito del nuevo monto.
+- [x] **UX a prueba de bloqueos (Error Recovery):** Integración de rutas de escape visuales (botón "¿Escribiste mal tu correo?") para purgar el caché y liberar inputs bloqueados si el usuario comete un error de tipeo en el email inicial.
 
 
 ## 🛠️ Próximos Pasos

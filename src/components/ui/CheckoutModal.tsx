@@ -5,9 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
 import Price from './Price';
 import api from '@/src/api/axios'; 
-
-// Importamos el contexto de autenticación que creaste
 import { useAuth } from '@/src/context/AuthContext';
+import { useOtpAuth } from '@/src/hooks/useOtpAuth'; 
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -18,56 +17,71 @@ interface CheckoutModalProps {
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, onComplete }) => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // Traemos al usuario logueado
+  const { user, isAuthenticated, login } = useAuth(); // Traemos al usuario logueado y las funciones
   
+  // Estados para el OTP (Paso Fantasma)
+  const { 
+    otpCode, setOtpCode, loading: otpLoading, timeLeft, 
+    sendOtp, verifyOtp, isCodeSent, syncState, email: otpEmail, clearOtpData
+  } = useOtpAuth(); // Agregué clearOtpData para el ticket de QA
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   
   // Nuevos estados de Negocio
   const [shippingMethod, setShippingMethod] = useState<'Standard' | 'Pickup'>('Standard');
-  // Nota: Asegurate de que 'Efectivo' esté agregado en tu product.types.ts en payment.method
+  // Nota: Asegurarse de que 'Efectivo' esté agregado en product.types.ts en payment.method
   const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'Transferencia' | 'Tarjeta'>('Transferencia');
   
   const [formData, setFormData] = useState({
-    email: '', 
-    name: '',
-    dni: '',
-    phone: '',
-    address: '', 
-    city: '', 
-    zip: '',
+    email: '', name: '', dni: '', phone: '', address: '', city: '', zip: '',
   });
 
-  // EFECTO: Pre-llenar el email si el usuario está logueado
-  useEffect(() => {
-    if (isOpen) {
-      // Al abrir: Forzamos el mail del usuario logueado. Si es nulo, string vacío.
-      setFormData((prev) => ({ 
-        ...prev, 
-        email: user ? user.email : '' 
-      }));
-    } else {
-      // Al cerrar: Hacemos un "Reseteo de Fábrica" para matar cualquier dato fantasma
-      setStep(1);
-      setErrors([]);
-      setFormData({
-        email: '', 
-        name: '',
-        dni: '',
-        phone: '',
-        address: '', 
-        city: '', 
-        zip: '',
-      });
-    }
-  }, [isOpen, user]);
-  
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   
   // Descuento del 10% si es Efectivo o Transferencia
   const discount = (paymentMethod === 'Efectivo' || paymentMethod === 'Transferencia') ? subtotal * 0.10 : 0;
   const total = subtotal - discount;
+
+  // EFECTO DE QA (TICKET 2): Si el carrito cambia (el total) mientras estaba en el Paso 3, 
+  // lo devolvemos al Paso 2 para que dé consentimiento explícito del nuevo total.
+  useEffect(() => {
+    if (step === 3 && cart.length > 0) {
+      setStep(2);
+    }
+  }, [total]); // Vigila si el total cambia
+
+  // EFECTO: Sincronización maestra al abrir o cerrar
+  useEffect(() => {
+    if (isOpen) {
+      syncState(); 
+      
+      // REGLA 1: Si hay un código volando pero nunca llenó sus datos, lo dejamos en paso 1
+      if (isCodeSent && !isAuthenticated && !formData.name) {
+        setStep(1);
+      }
+      
+      // REGLA 2 (TU BUG): Si estaba trabado en el Paso 3 (OTP) pero ahora ya está logueado, lo devolvemos al Paso 2
+      if (isAuthenticated && step === 3) {
+        setStep(2);
+      }
+      
+    } else {
+      // Dejamos que los datos vivan como borrador por si cerró la ventana por error.
+      setErrors([]);
+    }
+  }, [isOpen, syncState, isCodeSent, isAuthenticated, formData.name, step]);
+
+  // EFECTO: Pre-llenar el email (Usuario o Código Pendiente)
+  useEffect(() => {
+    if (isOpen && !formData.email) {
+      setFormData((prev) => ({ 
+        ...prev, 
+        email: user ? user.email : (isCodeSent ? otpEmail : '') 
+      }));
+    }
+  }, [isOpen, user, isCodeSent, otpEmail, formData.email]);
 
   if (!isOpen) return null;
 
@@ -98,6 +112,76 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
     }
   };
 
+  // Función aislada para procesar la compra (se usa directo si está logueado, o después del OTP si no lo está)
+  const processCheckout = async () => {
+    setLoading(true);
+    
+    // Mapeamos el carrito y le extirpamos la propiedad 'variants' a cada producto
+    const cleanedItems = cart.map((item) => {
+      return {
+        article_id: parseInt(item.id), 
+        variant_id: item.variant_id, 
+        quantity: item.quantity,
+        price: item.price
+      };
+    });
+
+    const newOrder: Order = {
+      date: new Date().toISOString(),
+      status: 'Procesando',
+      customer: {
+        email: formData.email,
+        name: formData.name,
+        phone: formData.phone,
+        dni_cuit: formData.dni // Mapeado
+      },
+      summary: {
+        subtotal: subtotal,
+        shipping: 0, // Acá en un futuro le sumás el costo del correo si hace falta
+        discount: discount,
+        total: total
+      },
+      payment: {
+        method: paymentMethod,
+        status: 'pending'
+      },
+      shipping: {
+        method: shippingMethod,
+        address: shippingMethod === 'Standard' ? formData.address : 'Retiro en Local',
+        city: shippingMethod === 'Standard' ? formData.city : 'Paraná',
+        zip: shippingMethod === 'Standard' ? formData.zip : '3100'
+      },
+      items: cleanedItems
+    };
+
+    try {
+      // LO ENVIAMOS AVISANDO QUE EL FORMATO ES JSON
+      const response = await api.post('/shop/checkout/', newOrder);
+      
+      // Usamos el ID real que devuelve tu compañero desde el Backend
+      const orderIdGenerado = response.data?.id || `TEMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      
+      // Creamos una copia de la orden con el ID final para el Contexto
+      const finalizedOrder = { ...newOrder, id: orderIdGenerado };
+
+      toast.success(`¡Pedido #${orderIdGenerado} generado con éxito!`);
+      
+      // ESTO ES CLAVE: Le pasamos la orden finalizada al contexto
+      onComplete(finalizedOrder); 
+      
+      // Limpiamos todo al completar
+      setStep(1);
+      setFormData({ email: '', name: '', dni: '', phone: '', address: '', city: '', zip: '' });
+      onClose();
+      navigate(`/orden/${orderIdGenerado}`); 
+    } catch (error) {
+      console.error("Error al enviar el pedido:", error);
+      toast.error("Hubo un error al procesar tu pedido. Por favor, intentá nuevamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleNext = async () => {
     setErrors([]);
 
@@ -106,69 +190,31 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
         setStep(2);
       }
     } else if (step === 2) {
-      setLoading(true);
-      
-      // Mapeamos el carrito y le extirpamos la propiedad 'variants' a cada producto
-      const cleanedItems = cart.map((item) => {
-        return {
-          article_id: parseInt(item.id), // ID del producto genérico
-          variant_id: item.variant_id, // El ID de la variante exacta (Talle+Color)
-          quantity: item.quantity,
-          price: item.price
-        };
-      });
-
-      const newOrder: Order = {
-        date: new Date().toISOString(),
-        status: 'Procesando',
-        customer: {
-          email: formData.email,
-          name: formData.name,
-          phone: formData.phone,
-          dni_cuit: formData.dni // Mapeado
-        },
-        summary: {
-          subtotal: subtotal,
-          shipping: 0, // Acá en un futuro le sumás el costo del correo si hace falta
-          discount: discount,
-          total: total
-        },
-        payment: {
-          method: paymentMethod,
-          status: 'pending'
-        },
-        shipping: {
-          method: shippingMethod,
-          address: shippingMethod === 'Standard' ? formData.address : 'Retiro en Local',
-          city: shippingMethod === 'Standard' ? formData.city : 'Paraná',
-          zip: shippingMethod === 'Standard' ? formData.zip : '3100'
-        },
-        items: cleanedItems
-      };
-
-      try {
-        // LO ENVIAMOS AVISANDO QUE EL FORMATO ES JSON
-        const response = await api.post('/shop/checkout/', newOrder);
-        
-        // Usamos el ID real que devuelve tu compañero desde el Backend
-        const orderIdGenerado = response.data?.id || `TEMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-        
-        // Creamos una copia de la orden con el ID final para el Contexto
-        const finalizedOrder = { ...newOrder, id: orderIdGenerado };
-
-        setLoading(false);
-        toast.success(`¡Pedido #${orderIdGenerado} generado con éxito!`);
-        
-        // ESTO ES CLAVE: Le pasamos la orden finalizada al contexto
-        onComplete(finalizedOrder); 
-        
-        onClose();
-        navigate(`/orden/${orderIdGenerado}`); 
-      } catch (error) {
-        console.error("Error al enviar el pedido:", error);
-        setLoading(false);
-        toast.error("Hubo un error al procesar tu pedido. Por favor, intentá nuevamente.");
+      if (isAuthenticated) {
+        // Si ya está logueado, procesa la compra directamente
+        await processCheckout();
+      } else {
+        if (isCodeSent) {
+          // Si ya se mandó el código, avanzamos directo al paso 3 sin reenviar
+          setStep(3);
+        } else {
+          // Si no está logueado y no hay código, mandamos código y abrimos el paso 3 fantasma
+          const sent = await sendOtp(formData.email);
+          if (sent) setStep(3);
+        }
       }
+    }
+  };
+
+  // Función exclusiva para el Paso 3 (Verificar e Iniciar Compra)
+  const handleVerifyAndPay = async () => {
+    const token = await verifyOtp();
+    if (token) {
+      // Logueamos al usuario globalmente en la app
+      login({ email: formData.email, token });
+      
+      // Disparamos la orden
+      await processCheckout();
     }
   };
 
@@ -181,10 +227,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-2xl">
       <div className="flex border-b border-gray-100">
-        {[1, 2].map((s) => (
-          <div key={s} className={`flex-1 py-4 text-center text-[10px] font-black uppercase tracking-[3px] transition-colors ${step >= s ? 'text-black' : 'text-gray-300'}`}>
-            {s === 1 ? 'Información' : 'Pago'}
-            <div className={`h-0.5 mt-2 mx-auto w-12 transition-colors ${step >= s ? 'bg-black' : 'bg-gray-100'}`} />
+        {/* Renderizado dinámico de pasos para incluir el Paso 3 solo si es necesario */}
+        {[1, 2, step === 3 ? 3 : null].filter(Boolean).map((s) => (
+          <div key={s} className={`flex-1 py-4 text-center text-[10px] font-black uppercase tracking-[3px] transition-colors ${step >= s! ? 'text-black' : 'text-gray-300'}`}>
+            {s === 1 ? 'Información' : s === 2 ? 'Pago' : 'Verificación'}
+            <div className={`h-0.5 mt-2 mx-auto w-12 transition-colors ${step >= s! ? 'bg-black' : 'bg-gray-100'}`} />
           </div>
         ))}
       </div>
@@ -197,22 +244,19 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
             
             {/* SELECTOR DE ENVÍO VS RETIRO */}
             <div className="flex space-x-4 mb-8">
-              <button 
-                onClick={() => setShippingMethod('Standard')}
-                className={`flex-1 py-4 border text-[10px] font-black uppercase tracking-widest transition-all ${shippingMethod === 'Standard' ? 'border-black bg-black text-white' : 'border-gray-200 text-gray-400 hover:border-black hover:text-black'}`}
-              >
-                Envío a Domicilio
-              </button>
-              <button 
-                onClick={() => setShippingMethod('Pickup')}
-                className={`flex-1 py-4 border text-[10px] font-black uppercase tracking-widest transition-all ${shippingMethod === 'Pickup' ? 'border-black bg-black text-white' : 'border-gray-200 text-gray-400 hover:border-black hover:text-black'}`}
-              >
-                Retiro en Local
-              </button>
+              <button onClick={() => setShippingMethod('Standard')} className={`flex-1 py-4 border text-[10px] font-black uppercase tracking-widest transition-all ${shippingMethod === 'Standard' ? 'border-black bg-black text-white' : 'border-gray-200 text-gray-400 hover:border-black hover:text-black'}`}>Envío a Domicilio</button>
+              <button onClick={() => setShippingMethod('Pickup')} className={`flex-1 py-4 border text-[10px] font-black uppercase tracking-widest transition-all ${shippingMethod === 'Pickup' ? 'border-black bg-black text-white' : 'border-gray-200 text-gray-400 hover:border-black hover:text-black'}`}>Retiro en Local</button>
             </div>
 
             <div className="space-y-4">
-              <input type="email" placeholder="EMAIL" className={getInputClass('email')} onChange={(e) => handleInputChange(e, 'email')} value={formData.email} />
+              <input 
+                type="email" 
+                placeholder="EMAIL" 
+                className={getInputClass('email')} 
+                onChange={(e) => handleInputChange(e, 'email')} 
+                value={formData.email} 
+                disabled={isAuthenticated || isCodeSent} // Bloqueamos si está logueado O si ya hay un OTP en curso
+              />
               
               <div className="grid grid-cols-2 gap-4">
                 <input type="text" placeholder="NOMBRE COMPLETO" className={getInputClass('name')} onChange={(e) => handleInputChange(e, 'name')} value={formData.name} />
@@ -243,9 +287,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
             <div className="space-y-4 mb-8">
               {/* Opcion 1: Efectivo */}
               <label onClick={() => setPaymentMethod('Efectivo')} className={`block border p-5 cursor-pointer transition-all ${paymentMethod === 'Efectivo' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                {/* ACÁ ESTÁ EL CAMBIO: items-center en el flex principal */}
                 <div className="flex items-center space-x-4">
-                  {/* ACÁ ESTÁ EL CAMBIO: sin mt-0.5 */}
                   <div className={`w-4 h-4 border flex items-center justify-center shrink-0 ${paymentMethod === 'Efectivo' ? 'border-black' : 'border-gray-300'}`}>
                     {paymentMethod === 'Efectivo' && <div className="w-2 h-2 bg-black" />}
                   </div>
@@ -311,16 +353,73 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
           </div>
         )}
 
+        {/* --- PASO 3: OTP FANTASMA --- */}
+        {step === 3 && (
+          <div className="animate-in slide-in-from-right duration-300 flex flex-col items-center py-6">
+            <i className="fa-solid fa-shield-check text-4xl text-black mb-6"></i>
+            <h3 className="text-2xl font-black uppercase tracking-tighter text-black mb-2">Seguridad</h3>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest text-center mb-8">
+              Enviamos un pin de acceso a <br/><span className="text-black">{formData.email}</span>
+            </p>
+
+            <input 
+              type="text" 
+              placeholder="000000" 
+              value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} 
+              maxLength={6}
+              className="w-full max-w-[200px] border-b border-gray-200 py-4 text-3xl font-black text-black focus:border-black outline-none tracking-[12px] placeholder:text-gray-200 transition-colors bg-transparent text-center mb-6"
+            />
+            
+            {timeLeft > 0 ? (
+              <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest animate-pulse">
+                Expira en {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+              </p>
+            ) : (
+              <button 
+                type="button" 
+                onClick={() => sendOtp(formData.email)} 
+                className="text-[10px] font-black text-black underline uppercase tracking-widest hover:text-gray-500 transition-colors cursor-pointer"
+              >
+                Reenviar código
+              </button>
+            )}
+
+            {/* EL PARCHE DE QA (TICKET 1): Botón para abortar si se equivocó de mail */}
+            <button 
+              type="button"
+              onClick={() => {
+                clearOtpData();
+                setStep(1);
+              }}
+              className="mt-6 text-[9px] font-bold text-gray-400 underline uppercase tracking-widest hover:text-black transition-colors cursor-pointer"
+            >
+              ¿Escribiste mal tu correo?
+            </button>
+          </div>
+        )}
+
         {/* BOTONES DE NAVEGACIÓN */}
         <div className="mt-12 flex space-x-4">
-          {step === 2 && (
-            <button onClick={() => setStep(1)} className="px-8 border border-gray-200 text-[10px] font-black uppercase tracking-[3px] hover:bg-gray-50 text-black transition-colors">
+          {step > 1 && (
+            <button 
+              onClick={() => setStep(step - 1)} 
+              disabled={loading || otpLoading}
+              className="px-8 border border-gray-200 text-[10px] font-black uppercase tracking-[3px] hover:bg-gray-50 text-black transition-colors disabled:opacity-50"
+            >
               Atrás
             </button>
           )}
-          <button onClick={handleNext} disabled={loading} className="flex-1 bg-black text-white py-5 text-[11px] font-black uppercase tracking-[4px] relative flex items-center justify-center transition-all hover:bg-gray-900 active:scale-[0.98] disabled:opacity-50">
-            {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : step === 2 ? <>CONFIRMAR <Price amount={total} className="ml-2" /></> : 'Continuar'}
-          </button>
+          
+          {step < 3 ? (
+            <button onClick={handleNext} disabled={loading || otpLoading} className="flex-1 bg-black text-white py-5 text-[11px] font-black uppercase tracking-[4px] relative flex items-center justify-center transition-all hover:bg-gray-900 active:scale-[0.98] disabled:opacity-50 cursor-pointer">
+              {(loading || otpLoading) ? <i className="fa-solid fa-circle-notch fa-spin"></i> : step === 2 ? <>CONFIRMAR <Price amount={total} className="ml-2" /></> : 'Continuar'}
+            </button>
+          ) : (
+            <button onClick={handleVerifyAndPay} disabled={loading || otpLoading || otpCode.length < 6 || timeLeft === 0} className="flex-1 bg-black text-white py-5 text-[11px] font-black uppercase tracking-[4px] relative flex items-center justify-center transition-all hover:bg-gray-900 active:scale-[0.98] disabled:opacity-50 cursor-pointer">
+              {(loading || otpLoading) ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Verificar y Pagar'}
+            </button>
+          )}
         </div>
       </div>
     </Modal>
