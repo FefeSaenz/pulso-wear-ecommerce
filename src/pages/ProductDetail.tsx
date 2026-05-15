@@ -36,14 +36,14 @@ const ProductDetail: React.FC = () => {
   const [mainImage, setMainImage] = useState<string>('');
   const [error, setError] = useState<string>('');
 
-  // NUEVO: Estado y Ref para controlar el Slider Mobile
+  // Estado y Ref para controlar el Slider Mobile
   const [currentSlide, setCurrentSlide] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
 
   // 3. INICIALIZAR DATA (Basado en tu interfaz Product)
   useEffect(() => {
     if (product) {
-      // Usamos el array de images que definiste en product.types.ts
+      // Usamos el array de images que definí en product.types.ts
       if (product.images && product.images.length > 0) {
         setMainImage(product.images[0]);
       } else {
@@ -178,11 +178,12 @@ const ProductDetail: React.FC = () => {
       {/* AJUSTE ESPACIADO BREADCRUMBS: Redujimos pt-10 a pt-6 para achicar el margen superior general */}
       <div className="max-w-360 mx-auto px-6 pt-6 w-full">
         
-        {/* BREADCRUMBS */}
+        {/* BREADCRUMBS UNIFICADOS */}
         {/* AJUSTE ESPACIADO BREADCRUMBS: Sacamos el md:mb-10 y lo dejamos en mb-6 para achicar el margen inferior */}
         <Breadcrumbs 
           className='mb-6'
           items={[
+            { label: 'Catálogo', href: '/productos' }, // Agregamos Catálogo como padre universal
             { label: product.category, href: `/category/${product.category.toLowerCase().replace(/\s+/g, '-')}` },
             { label: product.name }
           ]} 
@@ -267,9 +268,7 @@ const ProductDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* ========================================== */}
           {/* 2. VISTA DESKTOP (Miniaturas + Foto Gigante) */}
-          {/* ========================================== */}
           {/* AJUSTE NOTEBOOK: Limitamos el ancho max a 480px en lg para que la foto no explote en pantallas 720p, 
               pero vuelve a estar libre (xl:max-w-none) para tu monitor 4K. */}
           <div className="hidden lg:flex w-full lg:w-1/2 lg:max-w-120 xl:max-w-none flex-row gap-6">
@@ -319,9 +318,7 @@ const ProductDetail: React.FC = () => {
             
           </div>
 
-          {/* ========================================== */}
           {/* INFO Y COMPRA (Columna Derecha / Abajo)    */}
-          {/* ========================================== */}
           <div className="w-full lg:w-1/2 flex flex-col">
             {/* Etiqueta / Tag */}
             {product.tags && (
@@ -479,7 +476,6 @@ const ProductDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* AHORA EL CARRUSEL ESTÁ LIBRE. No está afectado por el max-w-360 ni los px-6 del div de arriba */}
       <ProductCarousel 
         title="Trends"
         variant='slim'

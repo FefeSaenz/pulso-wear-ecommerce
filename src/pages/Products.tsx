@@ -43,9 +43,14 @@ const Products: React.FC = () => {
         return unifiedProducts;
     }, [unifiedProducts, isOffersRoute]);
     
-    // 2. PARÁMETROS DE LA URL
+    // 2. PARÁMETROS DE LA URL Y CORRECCIÓN DE GUIONES
+    // Función para transformar "pantalon-cargo" en "Pantalon Cargo"
+    const formatCategoryUrl = (cat: string) => {
+        return cat.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    };
+
     const initialCategory = paramCategory 
-        ? paramCategory.charAt(0).toUpperCase() + paramCategory.slice(1) 
+        ? formatCategoryUrl(paramCategory)
         : searchParams.get('categoria') || 'Todos';
 
     const sizeFilter = searchParams.get('talle');
@@ -101,9 +106,10 @@ const Products: React.FC = () => {
               )
             : (activeCategory === 'Todos' ? 'CATÁLOGO' : activeCategory);
 
+    // BREADCRUMBS UNIFICADOS
     const breadcrumbItems = useMemo(() => {
         if (searchTerm) return [{ label: 'Catálogo', href: '/productos' }, { label: 'Búsqueda' }];
-        if (isOffersRoute) return [{ label: 'Ofertas' }];
+        if (isOffersRoute) return [{ label: 'Catálogo', href: '/productos' }, { label: 'Ofertas' }];
         if (activeCategory === 'Todos') return [{ label: 'Catálogo' }];
         
         return [
@@ -123,7 +129,6 @@ const Products: React.FC = () => {
         <div className="flex flex-col animate-in fade-in duration-500 pb-16">
 
             {/* 1. BREADCRUMBS SUTILES */}
-            {/* px-4 en mobile para alinear con la nueva grilla */}
             <div className="max-w-360 mx-auto px-4 md:px-6 w-full pt-6 pb-4">
                 <Breadcrumbs items={breadcrumbItems} />
             </div>
@@ -137,7 +142,6 @@ const Products: React.FC = () => {
             />
 
             {/* CONTENEDOR PRINCIPAL: Sidebar + Grid */}
-            {/* CAMBIO ACÁ: px-4 en mobile, px-6 en desktop. Acá el padre es el único que da padding */}
             <div className="max-w-360 mx-auto px-4 md:px-6 w-full flex flex-col lg:flex-row gap-12 mt-8">
                 
                 {/* SIDEBAR DE FILTROS (IZQUIERDA - Solo PC) */}
