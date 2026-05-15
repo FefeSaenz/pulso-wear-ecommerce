@@ -44,7 +44,6 @@ const Products: React.FC = () => {
     }, [unifiedProducts, isOffersRoute]);
     
     // 2. PARÁMETROS DE LA URL Y CORRECCIÓN DE GUIONES
-    // Función para transformar "pantalon-cargo" en "Pantalon Cargo"
     const formatCategoryUrl = (cat: string) => {
         return cat.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
@@ -53,6 +52,7 @@ const Products: React.FC = () => {
         ? formatCategoryUrl(paramCategory)
         : searchParams.get('categoria') || 'Todos';
 
+    const brandFilter = searchParams.get('marca'); // NUEVO
     const sizeFilter = searchParams.get('talle');
     const colorFilter = searchParams.get('color');
     const priceFilter = searchParams.get('precio');
@@ -64,8 +64,11 @@ const Products: React.FC = () => {
         sortBy, 
         setSortBy,
         categories,
+        brands, // NUEVO
         setActiveCategory,
         activeCategory,
+        setActiveBrand, // NUEVO
+        activeBrand, // NUEVO
         setActiveSize,
         setActiveColor,
         setActivePrice
@@ -77,12 +80,13 @@ const Products: React.FC = () => {
     // 4. SINCRONIZACIÓN: URL -> HOOK
     useEffect(() => {
         setActiveCategory(isOffersRoute ? 'Todos' : initialCategory);
+        setActiveBrand(brandFilter); // NUEVO
         setActiveSize(sizeFilter);
         setActiveColor(colorFilter);
         setActivePrice(priceFilter);
-    }, [initialCategory, sizeFilter, colorFilter, priceFilter, setActiveCategory, setActiveSize, setActiveColor, setActivePrice, isOffersRoute]);
+    }, [initialCategory, brandFilter, sizeFilter, colorFilter, priceFilter, setActiveCategory, setActiveBrand, setActiveSize, setActiveColor, setActivePrice, isOffersRoute]);
     
-    // 5. MANEJADOR DE FILTROS
+    // 5. MANEJADORES DE FILTROS Y NAVEGACIÓN
     const handleFilterChange = (key: string, value: string | null) => {
         const newParams = new URLSearchParams(searchParams);
         if (value) newParams.set(key, value);
@@ -94,6 +98,20 @@ const Products: React.FC = () => {
 
     const handleClearFilters = () => {
         setSearchParams(new URLSearchParams());
+    };
+
+    // Manejador Inteligente de Categorías
+    const handleCategoryChange = (newCategory: string) => {
+        const currentParams = new URLSearchParams(searchParams).toString();
+        const queryString = currentParams ? `?${currentParams}` : '';
+
+        if (newCategory === 'Todos') {
+            navigate(`/productos${queryString}`);
+        } else {
+            navigate(`/category/${newCategory.toLowerCase().replace(/\s+/g, '-')}${queryString}`);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsMobileFiltersOpen(false); 
     };
 
     const pageTitle = searchTerm
@@ -128,12 +146,10 @@ const Products: React.FC = () => {
     return (
         <div className="flex flex-col animate-in fade-in duration-500 pb-16">
 
-            {/* 1. BREADCRUMBS SUTILES */}
             <div className="max-w-360 mx-auto px-4 md:px-6 w-full pt-6 pb-4">
                 <Breadcrumbs items={breadcrumbItems} />
             </div>
 
-            {/* FILTER BAR (Sticky) */}
             <FilterBar 
                 title={pageTitle}
                 sortBy={sortBy}
@@ -141,19 +157,22 @@ const Products: React.FC = () => {
                 onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
             />
 
-            {/* CONTENEDOR PRINCIPAL: Sidebar + Grid */}
             <div className="max-w-360 mx-auto px-4 md:px-6 w-full flex flex-col lg:flex-row gap-12 mt-8">
                 
-                {/* SIDEBAR DE FILTROS (IZQUIERDA - Solo PC) */}
+                {/* SIDEBAR DESKTOP */}
                 <aside className="hidden lg:block w-64 shrink-0 sticky top-44 self-start max-h-[calc(100vh-14rem)] overflow-y-auto no-scrollbar pb-8 pr-4">
                     <FilterSidebar 
-                        activeFilters={{ sizeFilter, colorFilter, priceFilter, searchTerm }}
+                        activeFilters={{ sizeFilter, colorFilter, priceFilter, searchTerm, brandFilter }}
+                        categories={categories}
+                        activeCategory={activeCategory}
+                        brands={brands} // NUEVO
+                        activeBrand={activeBrand} // NUEVO
+                        onCategoryChange={handleCategoryChange}
                         onFilterChange={handleFilterChange}
                         onClearFilters={handleClearFilters}
                     />
                 </aside>
                 
-                {/* GRILLA DE PRODUCTOS (DERECHA) */}
                 <main className="flex-1">
                     <ProductGrid 
                         products={filteredProducts} 
@@ -163,7 +182,7 @@ const Products: React.FC = () => {
                 </main>
             </div>
 
-            {/* --- DRAWER DE FILTROS EXCLUSIVO MOBILE Y TABLET --- */}
+            {/* DRAWER MOBILE */}
             <div className={`fixed inset-0 z-50 flex lg:hidden ${isMobileFiltersOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
                 <div 
                     className={`absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer ui-backdrop ${isMobileFiltersOpen ? 'is-open' : ''}`} 
@@ -181,7 +200,12 @@ const Products: React.FC = () => {
                     </div>
                     <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
                         <FilterSidebar 
-                            activeFilters={{ sizeFilter, colorFilter, priceFilter, searchTerm }}
+                            activeFilters={{ sizeFilter, colorFilter, priceFilter, searchTerm, brandFilter }}
+                            categories={categories}
+                            activeCategory={activeCategory}
+                            brands={brands} // NUEVO
+                            activeBrand={activeBrand} // NUEVO
+                            onCategoryChange={handleCategoryChange}
                             onFilterChange={handleFilterChange}
                             onClearFilters={handleClearFilters}
                             onCloseMobile={() => setIsMobileFiltersOpen(false)}

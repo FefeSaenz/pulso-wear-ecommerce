@@ -6,23 +6,44 @@ interface FilterSidebarProps {
     sizeFilter: string | null; 
     colorFilter: string | null; 
     priceFilter: string | null;
-    searchTerm?: string | null; 
+    searchTerm?: string | null;
+    brandFilter?: string | null; // NUEVO
   };
+  categories?: string[];               
+  activeCategory?: string;             
+  brands?: string[];             // NUEVO
+  activeBrand?: string | null;   // NUEVO
+  onCategoryChange?: (c: string) => void; 
   onFilterChange: (key: string, value: string | null) => void;
   onClearFilters: () => void;
-  onCloseMobile?: () => void; // NUEVO prop para cerrar el sidebar en móvil
+  onCloseMobile?: () => void;
 }
 
-// Mapa Maestro de Normalización y Color
+// Mapa Maestro de Normalización y Color EXTENDIDO
 const COLOR_SYSTEM: Record<string, { hex: string, group: string }> = {
+  // Básicos
   'Negro': { hex: '#000000', group: 'Negro' },
+  'NEGRO': { hex: '#000000', group: 'Negro' },
   'Blanco': { hex: '#FFFFFF', group: 'Blanco' },
+  'BLANCO': { hex: '#FFFFFF', group: 'Blanco' },
+  
+  // Grises
   'Gris Oxford': { hex: '#4B4B4B', group: 'Gris' },
   'Gris Melange': { hex: '#B2B2B2', group: 'Gris' },
+  'Gris': { hex: '#808080', group: 'Gris' },
+  'GRIS': { hex: '#808080', group: 'Gris' },
+  
+  // Azules y Celestes
   'Azul Navy': { hex: '#1B2A4A', group: 'Azul' },
   'Dark Blue': { hex: '#1C3557', group: 'Azul' },
+  'Azul': { hex: '#292d8e', group: 'Azul' },
+  'AZUL': { hex: '#292d8e', group: 'Azul' },
+  'Celeste claro': { hex: '#ADD8E6', group: 'Celeste Claro' },
+  'CELESTE CLARO': { hex: '#ADD8E6', group: 'Celeste Claro' },
+  
+  // Otros
   'Bordó': { hex: '#6B1A1A', group: 'Rojo' },
-  'Beige': { hex: '#D4C5A9', group: 'Beige' },
+  'Beige': { hex: '#d3b47b', group: 'Beige' },
   'Verde Militar': { hex: '#4A5240', group: 'Verde' },
 };
 
@@ -30,23 +51,31 @@ const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL'];
 
 // Función para formatear el input con puntitos de miles
 const formatPriceInput = (value: string) => {
-  const raw = value.replace(/\D/g, ''); // Borra todo lo que no sea número
+  const raw = value.replace(/\D/g, ''); 
   if (!raw) return '';
-  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Agrega el punto cada 3 dígitos
+  return raw.replace(/\B(?=(\d{3})+(?!\d))/g, "."); 
 };
 
-const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterChange, onClearFilters, onCloseMobile }) => {
+const FilterSidebar: React.FC<FilterSidebarProps> = ({ 
+  activeFilters, 
+  categories,
+  activeCategory,
+  brands,
+  activeBrand,
+  onCategoryChange,
+  onFilterChange, 
+  onClearFilters, 
+  onCloseMobile 
+}) => {
   const { allProducts } = useApp();
   
   // --- ESTADOS LOCALES PARA LOS INPUTS DE PRECIO ---
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
-  // Sincronizar los inputs si el filtro se limpia desde la URL
   useEffect(() => {
     if (activeFilters.priceFilter) {
       const [min, max] = activeFilters.priceFilter.split('-');
-      // Formateamos los números que vienen crudos de la URL para que tengan puntitos
       setMinPrice(min ? formatPriceInput(min) : '');
       setMaxPrice(max ? formatPriceInput(max) : '');
     } else {
@@ -55,9 +84,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
     }
   }, [activeFilters.priceFilter]);
 
-  // Manejador del botón "Aplicar"
   const handleApplyPrice = () => {
-    // Le sacamos los puntitos antes de mandarlo a la URL
     const cleanMin = minPrice.replace(/\./g, '');
     const cleanMax = maxPrice.replace(/\./g, '');
 
@@ -67,13 +94,11 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
       onFilterChange('precio', `${cleanMin}-${cleanMax}`);
     }
 
-    // Si estamos en mobile, cerramos el drawer al aplicar
     if (onCloseMobile) {
       onCloseMobile();
     }
   };
 
-  // Talles únicos ordenados
   const sizes = useMemo(() => {
     const allSizes = allProducts.flatMap(p => 
       p.variants?.flatMap(v => v.sizes.map(s => s.size.toString())) || []
@@ -87,22 +112,24 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
     });
   }, [allProducts]);
 
-  // Colores Únicos Normalizados
+  // Modificamos la extracción para que respete la capitalización original si no hay grupo
   const colors = useMemo(() => {
     const rawColors = allProducts.flatMap(p => p.variants?.map(v => v.color.name) || []);
-    const groups = rawColors.map(name => COLOR_SYSTEM[name]?.group || name);
+    // Si no está en el mapa, usamos el nombre original en Title Case para que no quede todo en minúscula feo
+    const groups = rawColors.map(name => {
+      const mapped = COLOR_SYSTEM[name]?.group || COLOR_SYSTEM[name.toUpperCase()]?.group;
+      if (mapped) return mapped;
+      return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    });
     return Array.from(new Set(groups));
   }, [allProducts]);
 
-  // Función para obtener el HEX de un grupo (o el nombre si no hay grupo)
   const getHexForGroup = (groupName: string) => {
-    const found = Object.values(COLOR_SYSTEM).find(c => c.group === groupName);
+    // Buscamos ignorando mayúsculas/minúsculas
+    const found = Object.values(COLOR_SYSTEM).find(c => c.group.toLowerCase() === groupName.toLowerCase());
     return found ? found.hex : '#ccc';
   };
 
-  const hasActiveFilters = activeFilters.sizeFilter || activeFilters.colorFilter || activeFilters.priceFilter || activeFilters.searchTerm;
-
-  // Lógica para renderizar el texto del chip de precio
   const getPriceLabel = (filterStr: string) => {
     const [min, max] = filterStr.split('-');
     if (min && max) return `$${min} - $${max}`;
@@ -111,22 +138,51 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
     return '';
   };
 
+  // Evaluamos si hay ALGÚN filtro activo (incluyendo la categoría si no es "Todos")
+  const hasActiveFilters = 
+    activeFilters.sizeFilter || 
+    activeFilters.colorFilter || 
+    activeFilters.priceFilter || 
+    activeFilters.searchTerm ||
+    activeFilters.brandFilter ||
+    (activeCategory && activeCategory !== 'Todos');
+
+  // Función combinada para limpiar todo
+  const handleClearAll = () => {
+    onClearFilters();
+    if (activeCategory && activeCategory !== 'Todos' && onCategoryChange) {
+      onCategoryChange('Todos');
+    }
+  };
+
   return (
+    // Reordenamos el flujo visual (UX Standard)
     <div className="space-y-10">
-      {/* BOTÓN LIMPIAR FILTROS (Solo si hay filtros activos) */}
+      
       {/* SECCIÓN FILTROS ACTIVOS (CHIPS) */}
       {hasActiveFilters && (
         <div className="mb-6 p-4 bg-gray-50 border border-gray-100 rounded-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[10px] font-black uppercase tracking-[2px] text-black">Filtros Activos</h3>
             <button 
-              onClick={onClearFilters}
+              onClick={handleClearAll}
               className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:underline cursor-pointer"
             >
               ✕ Limpiar
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
+            
+            {activeCategory && activeCategory !== 'Todos' && (
+              <button 
+                onClick={() => onCategoryChange && onCategoryChange('Todos')}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
+              >
+                Categoría: {activeCategory}
+                <span className="text-gray-400 group-hover:text-red-500">✕</span>
+              </button>
+            )}
+
             {/* Chip de Búsqueda */}
             {activeFilters.searchTerm && (
               <button 
@@ -138,6 +194,17 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
               </button>
             )}
 
+            {/* NUEVO: Chip de Marca */}
+            {activeFilters.brandFilter && (
+              <button 
+                onClick={() => onFilterChange('marca', null)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
+              >
+                Marca: {activeFilters.brandFilter}
+                <span className="text-gray-400 group-hover:text-red-500">✕</span>
+              </button>
+            )}
+            
             {/* Chip de Talle */}
             {activeFilters.sizeFilter && (
               <button 
@@ -148,7 +215,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
                 <span className="text-gray-400 group-hover:text-red-500">✕</span>
               </button>
             )}
-
+            
             {/* Chip de Color */}
             {activeFilters.colorFilter && (
               <button 
@@ -159,7 +226,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
                 <span className="text-gray-400 group-hover:text-red-500">✕</span>
               </button>
             )}
-
+            
             {/* Chip de Precio */}
             {activeFilters.priceFilter && (
               <button 
@@ -174,54 +241,48 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
         </div>
       )}
 
-      {/* SECCIÓN PRECIO (NUEVOS TEXTBOXES UX) */}
-      <div>
-        <h3 className="text-[10px] font-black uppercase tracking-[4px] mb-6 text-gray-400">Precio</h3>
-        
-        <div className="flex items-center gap-3 mb-5">
-          {/* Input Mínimo */}
-          <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">
-              $
-            </span>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="Mínimo"
-              value={minPrice}
-              onChange={(e) => setMinPrice(formatPriceInput(e.target.value))}
-              className="w-full border border-gray-200 pl-6 pr-3 py-2.5 text-[16px] md:text-xs text-right focus:outline-none focus:border-black transition-colors rounded-sm placeholder:text-gray-300"
-            />
-          </div>
-
-          {/* Separador */}
-          <span className="text-gray-400 text-[10px] font-bold uppercase">a</span>
-
-          {/* Input Máximo */}
-          <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">
-              $
-            </span>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="Máximo"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(formatPriceInput(e.target.value))}
-              className="w-full border border-gray-200  pl-6 pr-3 py-2.5  text-[16px] md:text-xs text-right focus:outline-none focus:border-black transition-colors rounded-sm placeholder:text-gray-300"
-            />
+      {/* 1. SECCIÓN CATEGORÍAS */}
+      {categories && categories.length > 0 && (
+        <div>
+          <h3 className="text-[10px] font-black uppercase tracking-[4px] mb-6 text-gray-400">Categorías</h3>
+          <div className="flex flex-col items-start gap-2.5">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => onCategoryChange && onCategoryChange(cat)}
+                className={`text-[10px] uppercase tracking-tighter transition-colors cursor-pointer text-left ${
+                  activeCategory === cat ? 'text-black font-black' : 'text-gray-500 font-bold hover:text-black'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
+      )}
 
-        <button
-          onClick={handleApplyPrice}
-          className="w-full bg-black text-white py-3 px-4 text-[11px] font-black uppercase tracking-[4px] hover:bg-gray-900 active:scale-[0.98] transition-all cursor-pointer"
-        >
-          Aplicar
-        </button>
-      </div>
+      {/* 2. SECCIÓN MARCAS */}
+      {brands && brands.length > 0 && (
+        <div>
+          <h3 className="text-[10px] font-black uppercase tracking-[4px] mb-6 text-gray-400">Marcas</h3>
+          <div className="flex flex-col items-start gap-2.5">
+            {brands.map((brand) => (
+              <button
+                key={brand}
+                onClick={() => onFilterChange('marca', activeFilters.brandFilter === brand ? null : brand)}
+                className={`text-[10px] uppercase tracking-tighter transition-colors cursor-pointer text-left flex items-center gap-2 ${
+                  activeFilters.brandFilter === brand ? 'text-black font-black' : 'text-gray-500 font-bold hover:text-black'
+                }`}
+              >
+                {activeFilters.brandFilter === brand && <span className="w-1.5 h-1.5 bg-black rounded-full block shrink-0"></span>}
+                {brand}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* SECCIÓN TALLE */}
+      {/* 3. SECCIÓN TALLE */}
       <div>
         <h3 className="text-[10px] font-black uppercase tracking-[4px] mb-6 text-gray-400">Talle</h3>
         <div className="flex flex-wrap gap-2">
@@ -237,7 +298,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
         </div>
       </div>
 
-      {/* SECCIÓN COLOR */}
+      {/* 4. SECCIÓN COLOR */}
       <div>
         <h3 className="text-[10px] font-black uppercase tracking-[4px] mb-6 text-gray-400">Color</h3>
         <div className="space-y-2">
@@ -251,13 +312,50 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ activeFilters, onFilterCh
                 className={`w-4 h-4 rounded-full border border-gray-200 mr-3 transition-transform ${activeFilters.colorFilter === col ? 'ring-2 ring-black ring-offset-2 scale-110' : 'group-hover:scale-110'}`} 
                 style={{ backgroundColor: getHexForGroup(col) }} 
               />
-              <span className={`text-[10px] uppercase tracking-tighter ${activeFilters.colorFilter === col ? 'font-black' : 'text-gray-500 font-bold'}`}>
+              <span className={`text-[10px] uppercase tracking-tighter ${activeFilters.colorFilter === col ? 'text-black font-black' : 'text-gray-500 font-bold hover:text-black'}`}>
                 {col}
               </span>
             </button>
           ))}
         </div>
       </div>
+
+      {/* 5. SECCIÓN PRECIO (ÚLTIMA) */}
+      <div>
+        <h3 className="text-[10px] font-black uppercase tracking-[4px] mb-6 text-gray-400">Precio</h3>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">$</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="Mínimo"
+              value={minPrice}
+              onChange={(e) => setMinPrice(formatPriceInput(e.target.value))}
+              className="w-full border border-gray-200 pl-6 pr-3 py-2.5 text-[16px] md:text-xs text-right focus:outline-none focus:border-black transition-colors rounded-sm placeholder:text-gray-300"
+            />
+          </div>
+          <span className="text-gray-400 text-[10px] font-bold uppercase">a</span>
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">$</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="Máximo"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(formatPriceInput(e.target.value))}
+              className="w-full border border-gray-200  pl-6 pr-3 py-2.5  text-[16px] md:text-xs text-right focus:outline-none focus:border-black transition-colors rounded-sm placeholder:text-gray-300"
+            />
+          </div>
+        </div>
+        <button
+          onClick={handleApplyPrice}
+          className="w-full bg-black text-white py-3 px-4 text-[11px] font-black uppercase tracking-[4px] hover:bg-gray-900 active:scale-[0.98] transition-all cursor-pointer"
+        >
+          Aplicar
+        </button>
+      </div>
+
     </div>
   );
 };

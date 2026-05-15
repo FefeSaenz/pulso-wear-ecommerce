@@ -49,6 +49,7 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - `Data-Driven UI (Pattern)`: Componentes presentacionales que autoconstruyen su contenido basándose en el análisis del estado global. El `SearchOverlay` procesa el catálogo en tiempo real (`useMemo`) para inyectar dinámicamente las 3 categorías con mayor stock como "Sugerencias de Búsqueda", erradicando el hardcoding.
 - `Hierarchical Navigation Strategy (Pattern)`: Estandarización del sistema de Breadcrumbs (Migas de Pan) adoptando el modelo de "Ancla Padre Universal". Ante un catálogo de base de datos plana, se inyecta programáticamente la ruta `Catálogo` como nodo intermedio (`Inicio > Catálogo > Categoría > Producto`). Esto alinea el comportamiento del historial de navegación entre la vista general (PLP) y el detalle (PDP), evitando reemplazos de estado y asegurando que el usuario siempre pueda retroceder en el embudo sin perder contexto.
 - `URL Slug Normalization (Pattern)`: Interceptación y formateo de parámetros de URL. El sistema traduce automáticamente slugs amigables para SEO (ej: `pantalon-cargo`) a strings de negocio exactos (`Pantalon Cargo`) antes de inyectarlos en los hooks de filtrado, garantizando coincidencias (matches) perfectas con los datos crudos de la API.
+- `Dynamic Facet Extraction (Pattern)`: Sistema de extracción y normalización de facetas de filtrado (Categorías, Marcas, Talles, Colores) al vuelo mediante `useMemo`. El sistema procesa el catálogo unificado y construye las opciones del Sidebar dinámicamente, garantizando que el usuario solo vea filtros que tengan stock real asociado, y sincronizando el estado transversalmente a través de los Search Params de la URL.
 
 
 ## ✅ Logros y Avances
@@ -182,6 +183,9 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Unificación de Breadcrumbs:** Estandarización de la jerarquía de navegación en `Products.tsx` y `ProductDetail.tsx`. Se agregó "Catálogo" como padre universal, permitiendo que los links se apilen lógicamente y el usuario pueda navegar hacia atrás sin perder opciones.
 - [x] **Corrección de Ruteo de Categorías:** Resolución de bug crítico en el parseo de URLs. Se implementó una función (`formatCategoryUrl`) que convierte guiones en espacios y capitaliza palabras (ej: de `remera-oversize` a `Remera Oversize`), restaurando el filtrado para categorías compuestas.
 - [x] **Alineación PDP vs PLP:** Sincronización de los contextos de navegación para que la página de Detalles del Producto herede la misma estructura lógica de ruta que la vista de la tienda principal.
+- [x] **Estandarización UX de Filtros:** Reordenamiento arquitectónico del `FilterSidebar` siguiendo los estándares de e-commerce (Categorías > Marcas > Talles > Colores > Precio), guiando al usuario desde la decisión más general a la más específica.
+- [x] **Motor de Filtro por Marcas:** Extensión del hook `useProductFilters` para aislar y renderizar dinámicamente las marcas en stock, sincronizando el estado con la URL (`?marca=`).
+- [x] **Diccionario de Colores Extendido (Fallback):** Refactorización del `COLOR_SYSTEM`. Se amplió el mapeo de variables HEX y se implementó un sistema de inferencia (Title Case) para evitar el renderizado de colores vacíos (grises) cuando la API envía denominaciones no mapeadas.
 
 
 ## 🛠️ Próximos Pasos
