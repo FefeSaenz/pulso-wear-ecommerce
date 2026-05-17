@@ -1,6 +1,18 @@
 import axios from "axios";
 import { ApiResponse } from "@/src/types/api";
 
+// Helper: Generador de UUID seguro para todos los entornos
+const generateSafeUUID = () => {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID(); // <-- PRODUCCIÓN (Vercel) / Localhost
+  }
+  // <-- CELULAR / Red Local (HTTP)
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     timeout: 8000,
@@ -12,7 +24,8 @@ api.interceptors.request.use((config) => {
     let guestId = localStorage.getItem('pulso_guest_id');
     
     if (!guestId) {
-        guestId = crypto.randomUUID();
+        // Usamos la función segura en vez del crypto directo
+        guestId = generateSafeUUID();
         localStorage.setItem('pulso_guest_id', guestId);
     }
 
@@ -29,15 +42,13 @@ api.interceptors.request.use((config) => {
 
 // INTERCEPTOR DE RESPUESTAS (Manejo de errores)
 api.interceptors.response.use(
-    (response) => response, // Si todo sale bien, dejamos pasar la respuesta
+    (response) => response, 
     (error) => {
-        // Si el backend nos patea porque el token venció o es inválido
         if (error.response?.status === 401) {
         console.warn("Sesión expirada. Limpiando credenciales...");
         localStorage.removeItem('pulso_token');
         localStorage.removeItem('pulso_email');
         
-        // Redirige al inicio para forzar un nuevo login
         window.location.href = '/';
         }
         return Promise.reject(error);
@@ -51,12 +62,10 @@ export const getFrontData = async (): Promise<ApiResponse['data']> => {
 };
 
 // Flujo de Autenticación
-// Envía el mail para recibir el código OTP
 export const requestLoginCode = async (email: string) => {
     return await api.post("/shop/auth/", { email });
 };
 
-//Envía mail + código para recibir el Token
 export const verifyLoginCode = async (email: string, code: string) => {
     return await api.post("/shop/verify/", { email, code });
 };

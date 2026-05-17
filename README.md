@@ -50,6 +50,7 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - `Hierarchical Navigation Strategy (Pattern)`: Estandarización del sistema de Breadcrumbs (Migas de Pan) adoptando el modelo de "Ancla Padre Universal". Ante un catálogo de base de datos plana, se inyecta programáticamente la ruta `Catálogo` como nodo intermedio (`Inicio > Catálogo > Categoría > Producto`). Esto alinea el comportamiento del historial de navegación entre la vista general (PLP) y el detalle (PDP), evitando reemplazos de estado y asegurando que el usuario siempre pueda retroceder en el embudo sin perder contexto.
 - `URL Slug Normalization (Pattern)`: Interceptación y formateo de parámetros de URL. El sistema traduce automáticamente slugs amigables para SEO (ej: `pantalon-cargo`) a strings de negocio exactos (`Pantalon Cargo`) antes de inyectarlos en los hooks de filtrado, garantizando coincidencias (matches) perfectas con los datos crudos de la API.
 - `Dynamic Facet Extraction (Pattern)`: Sistema de extracción y normalización de facetas de filtrado (Categorías, Marcas, Talles, Colores) al vuelo mediante `useMemo`. El sistema procesa el catálogo unificado y construye las opciones del Sidebar dinámicamente, garantizando que el usuario solo vea filtros que tengan stock real asociado, y sincronizando el estado transversalmente a través de los Search Params de la URL.
+- `Graceful Degradation & Environment-Aware Execution (Pattern)`: Implementación de polyfills inteligentes en el core de la API (`axios.ts`). El sistema detecta el entorno de ejecución (Secure Context vs HTTP local) para determinar qué herramientas utilizar. Para la generación de UUIDs de sesión (`guest_id`), prioriza `window.crypto.randomUUID` en producción (Vercel/HTTPS) para máxima seguridad, pero provee un fallback matemático automático para permitir el testing en redes locales (celulares) sin crashear la aplicación.
 
 
 ## ✅ Logros y Avances
@@ -186,6 +187,7 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Estandarización UX de Filtros:** Reordenamiento arquitectónico del `FilterSidebar` siguiendo los estándares de e-commerce (Categorías > Marcas > Talles > Colores > Precio), guiando al usuario desde la decisión más general a la más específica.
 - [x] **Motor de Filtro por Marcas:** Extensión del hook `useProductFilters` para aislar y renderizar dinámicamente las marcas en stock, sincronizando el estado con la URL (`?marca=`).
 - [x] **Diccionario de Colores Extendido (Fallback):** Refactorización del `COLOR_SYSTEM`. Se amplió el mapeo de variables HEX y se implementó un sistema de inferencia (Title Case) para evitar el renderizado de colores vacíos (grises) cuando la API envía denominaciones no mapeadas.
+- [x] **Soporte para Local Network Testing:** Resolución de crasheo crítico al probar la app desde dispositivos móviles en la red local. Se reemplazó la llamada directa a `crypto.randomUUID()` (bloqueada por navegadores en HTTP) por un helper de generación segura (`generateSafeUUID`) que funciona universalmente sin comprometer la seguridad en el entorno de producción.
 
 
 ## 🛠️ Próximos Pasos
