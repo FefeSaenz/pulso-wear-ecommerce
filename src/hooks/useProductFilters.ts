@@ -61,9 +61,10 @@ export const useProductFilters = ({
       result = result.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase());
     }
 
-    // 2. Filtro por Marca (NUEVO)
+    // 2. Filtro por Marca (NUEVO - SOPORTA MULTI-SELECT)
     if (activeBrand) {
-      result = result.filter(p => p.brand?.toLowerCase() === activeBrand.toLowerCase());
+      const brandArray = activeBrand.split(','); // Convertimos "SHOWY,SHATO" en ['SHOWY', 'SHATO']
+      result = result.filter(p => brandArray.some(b => p.brand?.toLowerCase() === b.toLowerCase()));
     }
 
     // 3. Filtro por Búsqueda Inteligente (Search)
@@ -84,17 +85,19 @@ export const useProductFilters = ({
       });
     }
 
-    // 4. Filtro por Talle
+    // 4. Filtro por Talle (SOPORTA MULTI-SELECT)
     if (activeSize) {
-      result = result.filter(p => 
-        p.variants?.some(v => v.sizes.some(s => s.size.toString().toUpperCase() === activeSize.toUpperCase()))
+      const sizeArray = activeSize.split(',');
+      result = result.filter(p =>
+        p.variants?.some(v => v.sizes.some(s => sizeArray.some(activeS => activeS.toUpperCase() === s.size.toString().toUpperCase())))
       );
     }
 
-    // 5. Filtro por Color
+    // 5. Filtro por Color (SOPORTA MULTI-SELECT)
     if (activeColor) {
-      result = result.filter(p => 
-        p.variants?.some(v => v.color.name.toLowerCase().includes(activeColor.toLowerCase()))
+      const colorArray = activeColor.split(',');
+      result = result.filter(p =>
+        p.variants?.some(v => colorArray.some(activeC => v.color.name.toLowerCase().includes(activeC.toLowerCase())))
       );
     }
 

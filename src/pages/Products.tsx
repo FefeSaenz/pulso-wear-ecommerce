@@ -111,7 +111,7 @@ const Products: React.FC = () => {
             navigate(`/category/${newCategory.toLowerCase().replace(/\s+/g, '-')}${queryString}`);
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        setIsMobileFiltersOpen(false); 
+        // ELIMINADO: setIsMobileFiltersOpen(false); para que el drawer quede abierto a decisión del usuario
     };
 
     const pageTitle = searchTerm
@@ -208,7 +208,7 @@ const Products: React.FC = () => {
                             onCategoryChange={handleCategoryChange}
                             onFilterChange={handleFilterChange}
                             onClearFilters={handleClearFilters}
-                            onCloseMobile={() => setIsMobileFiltersOpen(false)}
+                            // ELIMINADO: onCloseMobile={() => setIsMobileFiltersOpen(false)} para que los chips no cierren el panel
                         />
                     </div>
                     <div className="p-6 border-t border-gray-100">
