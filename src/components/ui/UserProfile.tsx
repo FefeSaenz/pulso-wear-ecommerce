@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Order } from '@/src/types/product.types';
 import { useAuth } from '@/src/context/AuthContext';
-import { useOtpAuth } from '@/src/hooks/useOtpAuth'; // Importamos el hook
+import { useOtpAuth } from '@/src/hooks/useOtpAuth';
 import { toast } from 'sonner';
 import Price from './Price';
 
@@ -189,12 +189,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
 
               {step === 1 ? (
                 <form onSubmit={handleSendCode} className="space-y-6 animate-in slide-in-from-right duration-300">
+                  {/* FIX IOS ZOOM: text-[16px] md:text-xs */}
                   <input 
                     type="email" 
                     placeholder="TU EMAIL" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border-b border-gray-200 py-4 text-xs font-bold text-black focus:border-black outline-none uppercase tracking-widest placeholder:text-gray-300 transition-colors bg-transparent text-center"
+                    className="w-full border-b border-gray-200 py-4 text-[16px] md:text-xs font-bold text-black focus:border-black outline-none uppercase tracking-widest placeholder:text-gray-300 transition-colors bg-transparent text-center"
                   />
                   <button 
                     type="submit" 
@@ -232,13 +233,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
                       </button>
                     )}
                   </div>
+                  {/* FIX IOS ZOOM: text-[16px] md:text-2xl para que no haga zoom pero siga siendo grande en PC */}
                   <input 
                     type="text" 
                     placeholder="000000" 
                     value={otpCode}
                     onChange={handleOtpChange} 
                     maxLength={6}
-                    className="w-full border-b border-gray-200 py-4 text-2xl font-black text-black focus:border-black outline-none tracking-[10px] placeholder:text-gray-200 transition-colors bg-transparent text-center"
+                    className="w-full border-b border-gray-200 py-4 text-[16px] md:text-2xl font-black text-black focus:border-black outline-none tracking-[10px] placeholder:text-gray-200 transition-colors bg-transparent text-center"
                   />
                   <div className="flex space-x-3">
                     <button 
