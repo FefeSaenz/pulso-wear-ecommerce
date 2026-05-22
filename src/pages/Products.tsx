@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useSearchParams, useOutletContext, useParams, useNavigate, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async'; // NUEVO: Importamos Helmet para SEO dinámico
 
 // Context & Hooks
 import { useApp } from '@/src/context/AppContext';
@@ -114,6 +115,7 @@ const Products: React.FC = () => {
         // ELIMINADO: setIsMobileFiltersOpen(false); para que el drawer quede abierto a decisión del usuario
     };
 
+    // Título Visual (con HTML y Fueguitos)
     const pageTitle = searchTerm
         ? 'BÚSQUEDA'
         : isOffersRoute 
@@ -123,6 +125,13 @@ const Products: React.FC = () => {
                 </span>
               )
             : (activeCategory === 'Todos' ? 'CATÁLOGO' : activeCategory);
+
+    // Título Plano estricto para Google (SEO)
+    const metaTitle = searchTerm 
+        ? `Búsqueda: ${searchTerm}` 
+        : isOffersRoute 
+            ? 'Ofertas Exclusivas' 
+            : activeCategory === 'Todos' ? 'Catálogo Completo' : activeCategory;
 
     // BREADCRUMBS UNIFICADOS
     const breadcrumbItems = useMemo(() => {
@@ -143,8 +152,18 @@ const Products: React.FC = () => {
         </div>
         );
     }
+    
     return (
         <div className="flex flex-col animate-in fade-in duration-500 pb-16">
+            
+            {/* --- INYECCIÓN SEO DINÁMICO --- */}
+            <Helmet>
+                <title>{`PULSO | ${metaTitle}`}</title>
+                <meta name="description" content={`Explorá nuestra colección de ${metaTitle.toLowerCase()} en Pulso. Indumentaria urbana y streetwear con envíos a todo el país.`} />
+                <meta property="og:title" content={`PULSO | ${metaTitle}`} />
+                <meta property="og:description" content={`Descubrí lo mejor en ${metaTitle.toLowerCase()}. Calidad premium y estilo urbano.`} />
+                <meta property="og:url" content={window.location.href} />
+            </Helmet>
 
             <div className="max-w-360 mx-auto px-4 md:px-6 w-full pt-6 pb-4">
                 <Breadcrumbs items={breadcrumbItems} />

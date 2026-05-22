@@ -60,7 +60,13 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
           {/* Desktop: Logo (Alineado a la izquierda) */}
           <Link to="/" className="hidden lg:flex items-center hover:opacity-80 transition-opacity py-1">
             {logoPulso ? (
-              <img src={logoPulso} alt="Pulso Wear" className="h-14 lg:h-16 w-auto object-contain object-left transition-all" />
+              <img 
+                src={logoPulso} 
+                alt="Pulso Wear" 
+                width={150}
+                height={64}
+                fetchPriority="high"
+                className="h-14 lg:h-16 w-auto object-contain object-left transition-all" />
             ) : (
               <span className="text-3xl font-black tracking-tighter">{logoText}</span>
             )}
@@ -82,7 +88,13 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:hidden">
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
             {logoPulso ? (
-              <img src={logoPulso} alt="Pulso Wear" className="h-10 w-auto object-contain" />
+              <img 
+                src={logoPulso} 
+                alt="Pulso Wear" 
+                width={100}
+                height={40}
+                fetchPriority="high"
+                className="h-10 w-auto object-contain" />
             ) : (
               <span className="text-2xl font-black tracking-tighter">{logoText}</span>
             )}

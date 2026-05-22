@@ -61,7 +61,7 @@ const Layout: React.FC = () => {
             />
           
             <AnnouncementBar 
-                messages={["3X2 EN TODA LA WEB", "ENVÍO GRATIS + $120.000", "6 CUOTAS SIN INTERÉS"]} 
+                messages={["ENVÍO GRATIS + $200.000"]} 
             />
 
             <SearchOverlay 

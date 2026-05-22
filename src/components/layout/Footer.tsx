@@ -148,14 +148,14 @@ const Footer: React.FC<FooterProps> = ({ onOpenTerms }) => {
             {/* Izquierda: Identidad de la Marca */}
             <div className="flex flex-col gap-2">
               <p className="text-[10px] font-black uppercase tracking-[4px] text-white transition-colors">
-                Diseñado en Paraná. Calidad premium, cortes contemporáneos y estilo urbano duradero.
+                CALIDAD PREMIUM · ESTILO URBANO
               </p>
               <p className="text-[10px] font-black hover:text-white uppercase tracking-[4px] text-gray-700">
                 © {new Date().getFullYear()} PULSO. PARANÁ, ENTRE RÍOS. TODOS LOS DERECHOS RESERVADOS.
               </p>
             </div>
 
-            {/* Derecha: Firma de la Agencia / Developer */}
+            {/* Derecha: Firma de la Agencia / Developer 
             <a 
               href="https://innovaciondigital.ar/" 
               target="_blank" 
@@ -164,6 +164,7 @@ const Footer: React.FC<FooterProps> = ({ onOpenTerms }) => {
             >
               Developed by Innovación Digital
             </a>
+            */}
           </div>
       </div>
     </footer>

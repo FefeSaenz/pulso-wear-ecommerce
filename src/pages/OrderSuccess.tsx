@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async'; // NUEVO: Importamos Helmet
 import { Order } from '@/src/types/product.types';
 import api from '@/src/api/axios';
 import Price from '@/src/components/ui/Price';
@@ -10,13 +11,13 @@ const OrderSuccess: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const WHATSAPP_NUMBER = "5493431234567"; // Tu número acá
+  // TODO: Mover esto a variables de entorno cuando se limpien los hardcodeos
+  const WHATSAPP_NUMBER = "5493431234567"; 
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         // LLAMADA REAL A LA API
-        // Nota: Confirmá con tu backend si la ruta exacta es /shop/cart/, /shop/order/ o /shop/checkout/
         const response = await api.get(`/shop/cart/${id}`);
         setOrder(response.data);
         setLoading(false);
@@ -63,6 +64,12 @@ const OrderSuccess: React.FC = () => {
   return (
     <div className="max-w-3xl mx-auto px-5 py-12 md:py-20 animate-in fade-in duration-500">
       
+      {/* BLOQUEO SEO: Prevenimos que Google indexe los recibos de los clientes */}
+      <Helmet>
+        <title>PULSO | Pedido Confirmado</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+
       {/* HEADER DEL RECIBO */}
       <div className="text-center mb-12">
         <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 text-white shadow-lg shadow-green-500/20">
@@ -116,7 +123,6 @@ const OrderSuccess: React.FC = () => {
             {order.items.map((item, index) => (
               <div key={index} className="flex justify-between items-center bg-gray-50 p-4 border border-gray-100">
                 <div className="flex items-center space-x-4">
-                  {/* Acá aplicamos el ?. para evitar errores si no hay imagen */}
                   <img src={item.selectedImage || item.images?.[0]} alt={item.name} className="w-12 h-12 object-cover border border-gray-200" />
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-black">{item.name}</p>

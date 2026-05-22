@@ -101,18 +101,6 @@ const Home: React.FC = () => {
         }
     };
 
-    // Evitamos renderizar contenido inconsistente si la API está cargando
-    if (loading) {
-        return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="animate-pulse flex flex-col items-center">
-            <div className="h-12 w-12 bg-gray-200 rounded-full mb-4"></div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Pulso Wear</p>
-            </div>
-        </div>
-        );
-    }
-
     return (
         <div className="animate-in fade-in duration-700 flex flex-col gap-10 pb-16">
             <HeroBanner
