@@ -1,7 +1,7 @@
 import React from 'react';
 import NavLink from '@/src/components/ui/NavLink';
 import { useApp } from '@/src/context/AppContext';
-import WhiteLogoPulso from '@/src/assets/Positivo LOGO TIPO PULSO.png'
+import WhiteLogoPulso from '@/src/assets/logo-pulso-white.svg'
 import SloganPulso from '@/src/assets/Slogan.png'
 
 /**
@@ -51,7 +51,7 @@ const Footer: React.FC<FooterProps> = ({ onOpenTerms }) => {
           <img 
             src={WhiteLogoPulso} 
             alt="PULSO" 
-            className="w-48 md:w-60 object-contain"
+            className="w-48 md:w-56 object-contain"
           />
 
           {/* Slogan PNG */}

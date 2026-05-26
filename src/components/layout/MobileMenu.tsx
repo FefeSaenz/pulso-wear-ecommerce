@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom'; 
 import { useApp } from '@/src/context/AppContext';
 import NavLink from '@/src/components/ui/NavLink';
-import logoPulso from '@/src/assets/Logotipo principal PULSO.png';
+import logoPulso from '@/src/assets/logo-pulso-black.svg';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -40,7 +40,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, onOpenProfile 
             className="flex items-center hover:opacity-80 transition-opacity"
           >
             {logoPulso ? (
-              <img src={logoPulso} alt="Pulso Wear" className="h-9 w-auto object-contain" />
+              <img 
+                src={logoPulso} 
+                alt="Pulso Wear" 
+                width={100}
+                height={40}
+                className="h-6 md:h-7 w-auto max-w-30 object-contain" 
+              />
             ) : (
               <span className="text-[10px] font-black uppercase tracking-[4px]">{logoText}</span>
             )}

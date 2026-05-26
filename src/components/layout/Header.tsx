@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import NavLink from '@/src/components/ui/NavLink';
 import { useApp } from '@/src/context/AppContext';
-import logoPulso from '@/src/assets/Logotipo principal PULSO.png';
+import logoPulso from '@/src/assets/logo-pulso-black.svg';
 import MobileMenu from './MobileMenu';
 
 interface HeaderProps {
@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
           </button>
 
           {/* Desktop: Logo (Alineado a la izquierda) */}
-          <Link to="/" className="hidden lg:flex items-center hover:opacity-80 transition-opacity py-1">
+          <Link to="/" className="hidden lg:flex items-center hover:opacity-80 transition-opacity py-1 mr-10">
             {logoPulso ? (
               <img 
                 src={logoPulso} 
@@ -66,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
                 width={150}
                 height={64}
                 fetchPriority="high"
-                className="h-14 lg:h-16 w-auto object-contain object-left transition-all" />
+                className="h-14 lg:h-6 w-auto object-contain object-left transition-all" />
             ) : (
               <span className="text-3xl font-black tracking-tighter">{logoText}</span>
             )}
@@ -91,10 +91,10 @@ const Header: React.FC<HeaderProps> = ({ onOpenCart, onOpenProfile, onOpenSearch
               <img 
                 src={logoPulso} 
                 alt="Pulso Wear" 
-                width={100}
-                height={40}
+                width={150}
+                height={48}
                 fetchPriority="high"
-                className="h-10 w-auto object-contain" />
+                className="h-6 md:h-12 w-auto max-w-30 md:max-w-40 object-contain" />
             ) : (
               <span className="text-2xl font-black tracking-tighter">{logoText}</span>
             )}
