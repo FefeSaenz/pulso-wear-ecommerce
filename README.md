@@ -205,9 +205,15 @@ El proyecto sigue una estructura modular y reactiva para facilitar su mantenimie
 - [x] **Gestión de Crawlers:** Creación de `robots.txt` para bloquear el acceso de indexadores a la API (`/v1/`) y al futuro panel de administración (`/gestion/`).
 - [x] **Optimización de Core Web Vitals:** Eliminación de cuellos de botella de renderizado (doble loading), inyección de `fetchPriority="high"` en el Header y carga diferida (`lazy`) sin parpadeos en las Product Cards.
 - [x] **Auditoría Semántica HTML:** Verificación de jerarquía estricta de encabezados (`<h1>`, `<h2>`, `<h3>`) y uso correcto de etiquetas `<main>` a lo largo de la aplicación.
+- [x] **UI Performance (Native SVGs):** Migración total de logotipos estáticos PNG a vectores dinámicos nativos SVG (`logo-pulso-black.svg` y `logo-pulso-white.svg`) en Header, MobileMenu y Footer, con control fino de escalado responsive (`md:h-12`).
+- [x] **Integración Final de Checkout:** Conexión exitosa con la respuesta de creación del backend. El frontend decodifica el token JWT de la ruta anidada correcta (`response.data.data.token`) y parsea el identificador de tracking real (`response.data.data.order_number`), erradicando la generación de códigos ficticios temporales.
+- [x] **UX de Autenticación y Cooldown (OTP):** Temporizador de seguridad ampliado a 10 minutos (600s) en sincronía con el servidor. Implementación de un cooldown de 60 segundos (fricción controlada) antes de habilitar el botón de solicitar un nuevo código, mitigando spam y abandonos.
 
 
 ## 🛠️ Próximos Pasos
+- [ ] **Desbloqueo de Recibo de Compra (`OrderSuccess.tsx`):** A la espera de que el backend desarrolle el endpoint GET para consultar los datos de la orden generada buscando por su `order_number` alfanumérico.
+- [ ] **SEO / Social Cards (WhatsApp):** Configurar la imagen `og-social-card.jpg` con fondo negro sólido en la raíz para mitigar la transparencia del logo sobre fondos blancos en las previsualizaciones de mensajería, y ajustar el favicon.
+- [ ] **Conexión Dinámica de Panel (`/gestion`):** Consumir e hidratar los datos de administración global (textos de la barra de anuncios y datos del Footer) directo de los endpoints del backend.
 - [ ] Testeo de Flujo E2E (Producción): Realizar una compra de prueba completa en el servidor real para verificar la persistencia de la orden y la correcta respuesta del JSON hidratado.
 - [ ] Validación de Login OTP: Confirmar la recepción real de los correos y la validación de tokens JWT en el servidor de producción.
 - [ ] Integración con Pasarela de Pagos: Conectar el paso de pago del checkout con la API de Mercado Pago para procesar transacciones reales.

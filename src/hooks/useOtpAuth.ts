@@ -52,12 +52,12 @@ export const useOtpAuth = () => {
     setLoading(true);
     try {
       await requestLoginCode(targetEmail);
-      const expirationTime = Date.now() + 120 * 1000;
+      const expirationTime = Date.now() + 600 * 1000;
       localStorage.setItem('pulso_otp_end', expirationTime.toString());
       localStorage.setItem('pulso_otp_email', targetEmail);
       
       setEmail(targetEmail);
-      setTimeLeft(120);
+      setTimeLeft(600);
       setIsCodeSent(true);
       setOtpCode('');
       toast.success('¡Código enviado! Revisá tu casilla.');
@@ -78,10 +78,12 @@ export const useOtpAuth = () => {
     setLoading(true);
     try {
       const response = await verifyLoginCode(email, otpCode);
-      
-      // SOLUCIÓN PARA PRUEBAS: Si el mock tira OK pero no tiene token, inventamos uno para no romper el flujo.
-      const token = response?.data?.token || "token_simulado_front";
-      
+      const token = response?.data?.data?.token;
+
+      if (!token) {
+         throw new Error("El backend no devolvió un token válido.");
+      }
+
       clearOtpData();
       return token;
     } catch (error) {

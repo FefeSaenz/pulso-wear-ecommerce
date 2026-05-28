@@ -164,8 +164,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
       // LO ENVIAMOS AVISANDO QUE EL FORMATO ES JSON
       const response = await api.post('/shop/checkout/', newOrder);
       
-      // Usamos el ID real que devuelve tu compañero desde el Backend
-      const orderIdGenerado = response.data?.id || `TEMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      // Usamos el ID real que devuelve el Backend
+      const orderIdGenerado = response.data?.data?.order_number || `TEMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
       
       // Creamos una copia de la orden con el ID final para el Contexto
       const finalizedOrder = { ...newOrder, id: orderIdGenerado };
@@ -173,7 +173,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
       toast.success(`¡Pedido #${orderIdGenerado} generado con éxito!`);
       
       // ESTO ES CLAVE: Le pasamos la orden finalizada al contexto
-      onComplete(finalizedOrder); 
+      onComplete(finalizedOrder);
       
       // Limpiamos todo al completar
       setStep(1);
