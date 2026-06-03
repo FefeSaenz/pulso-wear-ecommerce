@@ -28,7 +28,7 @@ const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose }) => {
         <div className="space-y-3">
           <h3 className="text-[12px] font-black uppercase tracking-[2px] text-black">¿Realizan cambios?</h3>
           <p>
-            Si la prenda se encuentra fallada o necesitás otro talle, podés realizar un cambio acercándote a nuestro local: <strong>Buenos Aires 60 - Paseo de las luces, Paraná, Entre Ríos</strong>. Los cambios se realizan de lunes a sábados de 17:00 a 20:00 hs.
+            Si la prenda se encuentra fallada o necesitás otro talle, podés realizar un cambio acercándote a nuestro local: <strong>Buenos Aires 60 - Paseo de las luces, Paraná, Entre Ríos</strong>. Los cambios se realizan de martes a sábados de 17:00 a 20:00 hs.
           </p>
           <p>
             En el caso de querer hacer un cambio y vivas en el interior, deberás comunicarte a nuestro WhatsApp (encontrás el ícono en nuestra página abajo a la derecha) para coordinar. Los envíos por devolución son siempre a cargo del comprador.
@@ -39,7 +39,7 @@ const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose }) => {
           <ul className="list-disc pl-5 space-y-2 mt-2">
             <li>Está en buen estado y sin uso.</li>
             <li>En su packaging original con etiquetas.</li>
-            <li>Está dentro de los 30 días de realizada la compra.</li>
+            <li>Está dentro de los 15 días de realizada la compra.</li>
             <li>Deberás presentar el remito o factura.</li>
             <li>La ropa de otra temporada o rebajas NO TIENE CAMBIO. Sin excepción.</li>
             <li>En caso de querer cambiar una prenda adquirida en SALE/OFERTA se tomará como referencia el valor abonado.</li>
@@ -114,7 +114,7 @@ const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose }) => {
             ¡Sí! Tenemos nuestra tienda ubicada en <strong>Buenos Aires 60 - Paseo de las luces, Paraná, Entre Ríos</strong>. Podés acercarte para retirar tu pedido, cambiar o probar la prenda.
           </p>
           <p>
-            <strong>Días y horarios:</strong> De Lunes a Sábado de 17:00 a 20:00 horas.
+            <strong>Días y horarios:</strong> De Martes a Sábado de 17:00 a 20:00 horas.
           </p>
         </div>
 
