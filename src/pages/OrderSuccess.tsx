@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async'; // NUEVO: Importamos Helmet
+import { Helmet } from 'react-helmet-async';
 import { Order } from '@/src/types/product.types';
 import api from '@/src/api/axios';
 import Price from '@/src/components/ui/Price';
+import { mapOrderFromApi } from '@/src/utils/mappers';
 
 const OrderSuccess: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,7 +20,15 @@ const OrderSuccess: React.FC = () => {
       try {
         // LLAMADA REAL A LA API
         const response = await api.get(`/shop/cart/${id}`);
-        setOrder(response.data);
+
+        // Aplicamos el patrón Adapter estricto de un solo argumento
+        if (response.data?.data) {
+          const orderMapeada = mapOrderFromApi(response.data.data);
+          setOrder(orderMapeada);
+        } else {
+          setError(true);
+        }
+        
         setLoading(false);
       } catch (err) {
         console.error("Error al traer la orden:", err);
@@ -112,7 +121,10 @@ const OrderSuccess: React.FC = () => {
           <div>
             <p className="text-[9px] font-black uppercase tracking-[2px] text-gray-400 mb-3">Entrega: {order.shipping.method}</p>
             <p className="text-xs font-bold text-black uppercase">{order.shipping.address}</p>
-            <p className="text-xs text-gray-500">{order.shipping.city}, CP: {order.shipping.zip}</p>
+            {/* RENDERIZADO CONDICIONAL: Solo mostramos Ciudad y CP si el método es Standard (Envío) */}
+            {order.shipping.method === 'Standard' && (
+              <p className="text-xs text-gray-500">{order.shipping.city}, CP: {order.shipping.zip}</p>
+            )}
           </div>
         </div>
 

@@ -165,7 +165,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, cart, on
       const response = await api.post('/shop/checkout/', newOrder);
       
       // Usamos el ID real que devuelve el Backend
-      const orderIdGenerado = response.data?.data?.order_number || `TEMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      const orderIdGenerado = response.data?.data?.order_number;
+
+      if (!orderIdGenerado) {
+        throw new Error("El servidor procesó la compra pero no devolvió el número de seguimiento.");
+      }
       
       // Creamos una copia de la orden con el ID final para el Contexto
       const finalizedOrder = { ...newOrder, id: orderIdGenerado };

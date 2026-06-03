@@ -1,6 +1,6 @@
 // utils/mappers.ts
-import { Product, ProductVariant } from '../types/product.types';
-import { ApiDress } from '../types/api';
+import { Product, ProductVariant, Order } from '@/src/types/product.types';
+import { ApiDress } from '@/src/types/api';
 
 // 🛟 DICCIONARIO DE RESCATE: Traduce Hex a Palabras si el sistema de gestión falla
 const colorDictionary: Record<string, string> = {
@@ -90,4 +90,58 @@ export const mapApiDressToProduct = (apiDress: ApiDress): Product => {
 export const extractUniqueCategories = (products: Product[]): string[] => {
   const categories = products.map(p => p.category);
   return Array.from(new Set(categories)); // Elimina duplicados
+};
+
+/**
+ * Adapter Pattern (Strict): Transforma una Orden de la API al formato de la UI.
+ * Basado en el endpoint exclusivo GET /shop/cart/{id}
+ */
+export const mapOrderFromApi = (apiData: any): Order => {
+  // Buscamos la orden (dependiendo si el back la mandó suelta o adentro del array orders filtrado)
+  const backOrder = apiData?.order?.order_id ? apiData.order : (apiData?.customer?.orders?.[0] || apiData);
+  const backProfile = apiData?.profile || apiData?.customer?.profile;
+
+  // Validación amigable pero estricta
+  if (!backOrder || (!backOrder.order_id && !backOrder.order_number)) {
+    console.warn("⚠️ Aviso de parseo: El backend envió una estructura inesperada para la orden.", apiData);
+    throw new Error("Estructura de datos de la orden inválida");
+  }
+
+  return {
+    id: backOrder.order_number || backOrder.order_id?.toString() || 'ID-NO-ENCONTRADO',
+    date: backOrder.order_date || new Date().toISOString(),
+    status: backOrder.order_condition_name || 'Procesando',
+    customer: {
+      name: backProfile?.person_name || backOrder.person_name || 'Cliente',
+      email: backProfile?.person_email || '',
+      phone: backProfile?.person_cellphone || backOrder.person_cellphone || '',
+      dni_cuit: '' 
+    },
+    summary: {
+      subtotal: backOrder.order_subtotal || 0,
+      discount: backOrder.order_discount_amount || 0,
+      shipping: 0,
+      total: backOrder.order_total || 0
+    },
+    payment: {
+      method: backOrder.box_paymethod_name || 'Efectivo', 
+      status: 'pending'
+    },
+    shipping: {
+      method: backOrder.order_detail_address?.includes('Retiro') ? 'Pickup' : 'Standard',
+      address: backOrder.order_detail_address || 'Dirección no especificada',
+      city: '',
+      zip: ''
+    },
+    items: (backOrder.order_items || []).map((item: any) => ({
+      id: item.article_id?.toString() || '0',
+      variant_id: item.variant_id,
+      name: item.dress_name || 'Producto',
+      price: item.item_cost || 0,
+      quantity: item.item_count || 1,
+      selectedColor: item.variant_color || 'N/A',
+      selectedSize: item.variant_size || 'N/A',
+      selectedImage: item.dress_picture || undefined 
+    }))
+  };
 };
