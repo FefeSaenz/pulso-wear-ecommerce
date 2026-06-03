@@ -45,16 +45,17 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAdd
       {/* Botón de cerrar específico del diseño QuickView */}
       <button 
         onClick={onClose}
-        className="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md text-gray-500 hover:text-black transition-colors cursor-pointer"
+        className="absolute top-3 right-3 lg:top-4 lg:right-4 z-20 w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-md text-gray-500 hover:text-black transition-colors cursor-pointer"
       >
         <i className="fa-solid fa-xmark"></i>
       </button>
 
-      <div className="flex flex-col md:flex-row overflow-hidden max-h-[95vh]">
+      {/* Ajuste de altura máxima equilibrada para notebook (aprox 85vh) */}
+      <div className="flex flex-col md:flex-row overflow-hidden h-full max-h-[92vh] md:max-h-[85vh] 2xl:max-h-[92vh]">
         {/* SECCIÓN DE GALERÍA */}
-        <div className="w-full md:w-[60%] bg-gray-50 flex flex-col md:flex-row">
+        <div className="w-full md:w-[55%] bg-gray-50 flex flex-col md:flex-row">
           {/* Miniaturas (Desktop) */}
-          <div className="hidden md:flex flex-col p-4 space-y-2 w-20 overflow-y-auto custom-scrollbar">
+          <div className="hidden md:flex flex-col p-3 lg:p-4 space-y-2 w-16 lg:w-20 overflow-y-auto no-scrollbar">
             {product.images.map((img, idx) => (
               <button
                 key={idx}
@@ -97,97 +98,126 @@ const QuickViewModal: React.FC<QuickViewModalProps> = ({ product, onClose, onAdd
           </div>
         </div>
 
-        {/* SECCIÓN DE INFORMACIÓN */}
-        <div className="w-full md:w-[40%] p-8 md:p-10 flex flex-col justify-center overflow-y-auto bg-white">
-          <p className="text-[10px] font-bold uppercase tracking-[3px] text-gray-400 mb-2">{product.category}</p>
-          <h2 className="text-2xl font-black uppercase tracking-tighter mb-4 leading-tight text-black">{product.name}</h2>
-          
-          <Price amount={product.price} className="text-xl font-bold mb-8 text-black block" />
-          
-          {/* NUEVO: Selección de Color */}
-          {currentVariant.color.name !== 'ÚNICO' && (
-            <div className="mb-6">
-              <p className="text-xs font-bold uppercase tracking-widest mb-3 text-black">
-                Color: <span className="text-gray-500 font-normal">{currentVariant.color.name}</span>
-              </p>
-              <div className="flex gap-2">
-                {product.variants.map((variant, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      setSelectedVariant(variant);
-                      // Al cambiar de color, autoseleccionamos el primer talle disponible de ese color
-                      setSelectedSize(variant.sizes[0]?.size.toString() || '');
-                      setImageError(false);
-                    }}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${
-                      currentVariant.color.name === variant.color.name ? 'border-black scale-110' : 'border-transparent hover:scale-110'
-                    }`}
-                    style={{ backgroundColor: variant.color.hex }}
-                    title={variant.color.name}
-                  />
-                ))}
+        {/* SECCIÓN DE INFORMACIÓN: Paddings y gaps ultra comprimidos para 1366x768 */}
+        <div className="w-full md:w-[45%] p-5 lg:p-6 2xl:p-10 flex flex-col justify-between overflow-y-auto no-scrollbar bg-white">
+          <div className="space-y-3 lg:space-y-4 2xl:space-y-6">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[3px] text-gray-400 mb-1">{product.category}</p>
+              <h2 className="text-xl lg:text-2xl 2xl:text-3xl font-black uppercase tracking-tighter leading-tight text-black">{product.name}</h2>
+            </div>
+            
+            {/* Precio y Descuento */}
+            <div className="flex items-center gap-3">
+              <Price amount={product.price} className="text-lg lg:text-xl 2xl:text-2xl font-bold text-black" />
+              {product.original_price && (
+                <span className="text-xs lg:text-sm 2xl:text-base text-gray-400 line-through">${product.original_price.toLocaleString('es-AR')}</span>
+              )}
+            </div>
+            
+            {/* Selección de Color */}
+            {currentVariant.color.name !== 'ÚNICO' && (
+              <div className="border-t border-gray-100 pt-3 2xl:pt-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-[2px] text-gray-500">Color</span>
+                  <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-[2px] text-black bg-gray-50 px-2 py-0.5 rounded-full">
+                    {currentVariant.color.name}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((variant, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedVariant(variant);
+                        // Al cambiar de color, autoseleccionamos el primer talle disponible de ese color
+                        setSelectedSize(variant.sizes[0]?.size.toString() || '');
+                        setImageError(false);
+                      }}
+                      className={`px-3 py-1.5 2xl:px-4 2xl:py-2 border rounded-sm text-[9px] lg:text-[10px] font-bold uppercase transition-all whitespace-nowrap cursor-pointer ${
+                        currentVariant.color.name === variant.color.name 
+                          ? 'border-black bg-black text-white' 
+                          : 'border-gray-200 bg-white hover:border-black text-gray-600'
+                      }`}
+                    >
+                      {variant.color.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Selección de Talle (Basado en la variante activa) */}
+            <div className="border-t border-gray-100 pt-3 2xl:pt-5">
+              <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-black">Seleccionar Talle</p>
+              <div className="flex flex-wrap gap-1.5 2xl:gap-2">
+                {currentVariant.sizes.map((sizeObj) => {
+                  const sizeStr = sizeObj.size.toString();
+                  const isAvailable = sizeObj.available && sizeObj.stock > 0;
+                  
+                  return (
+                    <button
+                      key={sizeStr}
+                      onClick={() => isAvailable && setSelectedSize(sizeStr)}
+                      disabled={!isAvailable}
+                      className={`w-10 h-10 lg:w-11 lg:h-11 2xl:w-12 2xl:h-12 border flex items-center justify-center text-[10px] lg:text-[11px] font-bold transition-all ${
+                        !isAvailable 
+                          ? 'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed opacity-60 line-through' 
+                          : selectedSize === sizeStr 
+                            ? 'bg-black text-white cursor-pointer' 
+                            : 'bg-white border-gray-200 hover:border-black text-gray-800 cursor-pointer'
+                      }`}
+                    >
+                      {sizeStr}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          )}
 
-          {/* Selección de Talle (Basado en la variante activa) */}
-          <div className="mb-8">
-            <p className="text-xs font-bold uppercase tracking-widest mb-4 text-black">Seleccionar Talle</p>
-            <div className="flex flex-wrap gap-2">
-              {currentVariant.sizes.map((sizeObj) => {
-                const sizeStr = sizeObj.size.toString();
-                const isAvailable = sizeObj.available && sizeObj.stock > 0;
-                
-                return (
-                  <button
-                    key={sizeStr}
-                    onClick={() => isAvailable && setSelectedSize(sizeStr)}
-                    disabled={!isAvailable}
-                    className={`w-12 h-12 border flex items-center justify-center text-[11px] font-bold transition-all ${
-                      !isAvailable 
-                        ? 'bg-gray-100 text-gray-400 border-gray-100 cursor-not-allowed opacity-60 line-through' 
-                        : selectedSize === sizeStr 
-                          ? 'bg-black text-white  cursor-pointer' 
-                          : 'bg-white border-gray-200 hover:border-black text-gray-800 cursor-pointer'
-                    }`}
-                  >
-                    {sizeStr}
-                  </button>
-                );
-              })}
+            {/* Descripción y Detalles */}
+            <div className="border-t border-gray-100 pt-3 2xl:pt-5">
+              {/* Marca */}
+              {product.brand && (
+                <div className="flex items-center gap-2 mb-2 2xl:mb-4">
+                  <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-[2px] text-gray-400">Marca:</span>
+                  <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-[2px] text-black bg-gray-50 px-2 py-0.5">{product.brand}</span>
+                </div>
+              )}
+              
+              {/* Descripción con Fallback y saltos de línea */}
+              <div>
+                <h4 className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest mb-1 text-black">Descripción</h4>
+                <p className="text-xs lg:text-sm text-gray-500 leading-relaxed whitespace-pre-line line-clamp-2 2xl:line-clamp-none">
+                  {product.description || 'Combinación ideal entre confort duradero y cortes contemporáneos.'}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Descripción */}
-          <div className="mb-10">
-             <h4 className="text-[10px] font-black uppercase tracking-widest mb-2 text-black">Descripción</h4>
-             <p className="text-sm text-gray-500 leading-relaxed">
-               {product.description}
-             </p>
+          {/* Botón de acción con pt ajustado */}
+          <div className="pt-4 2xl:pt-6 mt-auto">
+            <button
+              onClick={() => {
+                if (selectedSize) {
+                  const newItem: CartItem = {
+                    ...product,
+                    quantity: 1,
+                    selectedSize: selectedSize,
+                    selectedColor: currentVariant.color.name,
+                    selectedImage: mainImageSrc
+                  };
+                  onAddToCart(newItem);
+                }
+              }}
+              disabled={!selectedSize}
+              className={`w-full py-3.5 lg:py-4 2xl:py-5 text-[11px] lg:text-[12px] font-black uppercase tracking-[4px] transition-colors flex items-center justify-center space-x-3 cursor-pointer ${
+                selectedSize ? 'bg-black text-white hover:bg-gray-900' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <i className="fa-solid fa-cart-plus"></i>
+              <span>{selectedSize ? 'Añadir al carrito' : 'Seleccioná un talle'}</span>
+            </button>
           </div>
-
-          <button
-            onClick={() => {
-              if (selectedSize) {
-                const newItem: CartItem = {
-                  ...product,
-                  quantity: 1,
-                  selectedSize: selectedSize,
-                  selectedColor: currentVariant.color.name,
-                  selectedImage: mainImageSrc
-                };
-                onAddToCart(newItem);
-              }
-            }}
-            disabled={!selectedSize}
-            className={`w-full py-5 text-[12px] font-black uppercase tracking-[4px] transition-colors flex items-center justify-center space-x-3 cursor-pointer ${
-              selectedSize ? 'bg-black text-white hover:bg-gray-900' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            <i className="fa-solid fa-cart-plus"></i>
-            <span>{selectedSize ? 'Añadir al carrito' : 'Seleccioná un talle'}</span>
-          </button>
         </div>
       </div>
     </Modal>

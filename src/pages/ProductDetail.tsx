@@ -438,33 +438,33 @@ const ProductDetail: React.FC = () => {
                   
                   <ul className="space-y-3">
                     {product.brand && (
-                      <li className="flex items-center">
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black min-w-28">Marca:</span> 
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black">{product.brand}</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-400 min-w-24">Marca:</span> 
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-black bg-gray-50 px-2 py-1">{product.brand}</span>
                       </li>
                     )}
                     {product.material && (
-                      <li className="flex items-center">
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black min-w-28">Material:</span> 
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black">{product.material}</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-400 min-w-24">Material:</span> 
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-black bg-gray-50 px-2 py-1">{product.material}</span>
                       </li>
                     )}
                     {product.category && (
-                      <li className="flex items-center">
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black min-w-28">Categoría:</span> 
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black">{product.category}</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-400 min-w-24">Categoría:</span> 
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-black bg-gray-50 px-2 py-1">{product.category}</span>
                       </li>
                     )}
                     {product.subcategory && (
-                      <li className="flex items-center">
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black min-w-28">Estilo:</span> 
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black">{product.subcategory}</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-400 min-w-24">Estilo:</span> 
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-black bg-gray-50 px-2 py-1">{product.subcategory}</span>
                       </li>
                     )}
                     {product.gender && (
-                      <li className="flex items-center">
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black min-w-28">Género:</span> 
-                        <span className="text-[11px] font-black uppercase tracking-[2px] text-black">{product.gender}</span>
+                      <li className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-gray-400 min-w-24">Género:</span> 
+                        <span className="text-[10px] font-black uppercase tracking-[2px] text-black bg-gray-50 px-2 py-1">{product.gender}</span>
                       </li>
                     )}
                   </ul>
