@@ -103,8 +103,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     } else {
       onFilterChange('precio', `${cleanMin}-${cleanMax}`);
     }
-
-    // ELIMINADO: onCloseMobile() para que no se cierre el Drawer al aplicar precio
   };
 
   const sizes = useMemo(() => {
@@ -117,22 +115,16 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       const indexA = SIZE_ORDER.indexOf(a.toUpperCase());
       const indexB = SIZE_ORDER.indexOf(b.toUpperCase());
       
-      // 1. Si ambos son letras, ordena según SIZE_ORDER
       if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-      // 2. Si A es letra y B es número, A va primero
       if (indexA !== -1) return -1;
-      // 3. Si B es letra y A es número, B va primero
       if (indexB !== -1) return 1;
       
-      // 4. Si ambos son números (ej: 40 y 42), ordena matemáticamente
       return parseInt(a) - parseInt(b);
     });
   }, [allProducts]);
 
-  // Modificamos la extracción para que respete la capitalización original si no hay grupo
   const colors = useMemo(() => {
     const rawColors = allProducts.flatMap(p => p.variants?.map(v => v.color.name) || []);
-    // Si no está en el mapa, usamos el nombre original en Title Case para que no quede todo en minúscula feo
     const groups = rawColors.map(name => {
       const mapped = COLOR_SYSTEM[name]?.group || COLOR_SYSTEM[name.toUpperCase()]?.group;
       if (mapped) return mapped;
@@ -142,7 +134,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   }, [allProducts]);
 
   const getHexForGroup = (groupName: string) => {
-    // Buscamos ignorando mayúsculas/minúsculas
     const found = Object.values(COLOR_SYSTEM).find(c => c.group.toLowerCase() === groupName.toLowerCase());
     return found ? found.hex : '#ccc';
   };
@@ -155,16 +146,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     return '';
   };
 
-  // Evaluamos si hay ALGÚN filtro activo (incluyendo la categoría si no es "Todos")
   const hasActiveFilters = 
-    activeFilters.sizeFilter || 
+    !!(activeFilters.sizeFilter || 
     activeFilters.colorFilter || 
     activeFilters.priceFilter || 
     activeFilters.searchTerm ||
     activeFilters.brandFilter ||
-    (activeCategory && activeCategory !== 'Todos');
+    (activeCategory && activeCategory !== 'Todos'));
 
-  // Función combinada para limpiar todo
   const handleClearAll = () => {
     onClearFilters();
     if (activeCategory && activeCategory !== 'Todos' && onCategoryChange) {
@@ -172,96 +161,95 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     }
   };
 
-  // Convertimos las strings separadas por comas en arrays locales para iterar más fácil
   const activeBrandsArray = activeFilters.brandFilter ? activeFilters.brandFilter.split(',') : [];
   const activeSizesArray = activeFilters.sizeFilter ? activeFilters.sizeFilter.split(',') : [];
   const activeColorsArray = activeFilters.colorFilter ? activeFilters.colorFilter.split(',') : [];
 
   return (
     // Reordenamos el flujo visual (UX Standard)
-    <div className="space-y-6 md:space-y-8">
+    // Aplicamos padding top condicional solo si NO hay filtros activos para compensar el pt-0 del padre en mobile
+    <div className={`space-y-6 md:space-y-8 relative ${!hasActiveFilters ? 'pt-6 lg:pt-0' : ''}`}>
       
-      {/* SECCIÓN FILTROS ACTIVOS (CHIPS) */}
+      {/* SECCIÓN FILTROS ACTIVOS (CHIPS) - Máscara Sólida Premium */}
       {hasActiveFilters && (
-        <div className="mb-6 p-4 bg-gray-50 border border-gray-100 rounded-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[10px] font-black uppercase tracking-[2px] text-black">Filtros Activos</h3>
-            <button 
-              onClick={handleClearAll}
-              className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:underline cursor-pointer"
-            >
-              ✕ Limpiar
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            
-            {activeCategory && activeCategory !== 'Todos' && (
+        // El 'pt-6 lg:pt-0' asegura que cuando el chip esté arriba de todo, respete el diseño original.
+        <div className="sticky top-0 z-30 bg-white pt-6 lg:pt-0 pb-4 -mx-6 px-6 lg:mx-0 lg:px-0 lg:-mr-4 lg:pr-4 border-b border-gray-100 lg:border-gray-200 shadow-sm lg:shadow-none mb-6">
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[10px] font-black uppercase tracking-[2px] text-black">Filtros Activos</h3>
               <button 
-                onClick={() => onCategoryChange && onCategoryChange('Todos')}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
+                onClick={handleClearAll}
+                className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors cursor-pointer flex items-center gap-1"
               >
-                Categoría: {activeCategory}
-                <span className="text-gray-400 group-hover:text-red-500">✕</span>
+                <span>✕</span> Limpiar
               </button>
-            )}
+            </div>
+            
+            <div className="flex flex-wrap gap-2 max-h-[120px] overflow-y-auto no-scrollbar">
+              
+              {activeCategory && activeCategory !== 'Todos' && (
+                <button 
+                  onClick={() => onCategoryChange && onCategoryChange('Todos')}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-xs"
+                >
+                  Categoría: {activeCategory}
+                  <span className="text-gray-400 group-hover:text-red-500">✕</span>
+                </button>
+              )}
 
-            {/* Chip de Búsqueda */}
-            {activeFilters.searchTerm && (
-              <button 
-                onClick={() => onFilterChange('search', null)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
-              >
-                Búsqueda: {activeFilters.searchTerm}
-                <span className="text-gray-400 group-hover:text-red-500">✕</span>
-              </button>
-            )}
+              {activeFilters.searchTerm && (
+                <button 
+                  onClick={() => onFilterChange('search', null)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-xs"
+                >
+                  Búsqueda: {activeFilters.searchTerm}
+                  <span className="text-gray-400 group-hover:text-red-500">✕</span>
+                </button>
+              )}
 
-            {/* NUEVO: Chips de Marca (Multi-select) */}
-            {activeBrandsArray.map(brand => (
-              <button 
-                key={`chip-brand-${brand}`}
-                onClick={() => onFilterChange('marca', toggleFilter(activeFilters.brandFilter, brand))}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
-              >
-                Marca: {brand}
-                <span className="text-gray-400 group-hover:text-red-500">✕</span>
-              </button>
-            ))}
-            
-            {/* Chips de Talle (Multi-select) */}
-            {activeSizesArray.map(size => (
-              <button 
-                key={`chip-size-${size}`}
-                onClick={() => onFilterChange('talle', toggleFilter(activeFilters.sizeFilter, size))}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
-              >
-                Talle: {size}
-                <span className="text-gray-400 group-hover:text-red-500">✕</span>
-              </button>
-            ))}
-            
-            {/* Chips de Color (Multi-select) */}
-            {activeColorsArray.map(color => (
-              <button 
-                key={`chip-color-${color}`}
-                onClick={() => onFilterChange('color', toggleFilter(activeFilters.colorFilter, color))}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
-              >
-                Color: {color}
-                <span className="text-gray-400 group-hover:text-red-500">✕</span>
-              </button>
-            ))}
-            
-            {/* Chip de Precio */}
-            {activeFilters.priceFilter && (
-              <button 
-                onClick={() => onFilterChange('precio', null)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-sm"
-              >
-                Precio: {getPriceLabel(activeFilters.priceFilter)}
-                <span className="text-gray-400 group-hover:text-red-500">✕</span>
-              </button>
-            )}
+              {activeBrandsArray.map(brand => (
+                <button 
+                  key={`chip-brand-${brand}`}
+                  onClick={() => onFilterChange('marca', toggleFilter(activeFilters.brandFilter, brand))}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-xs"
+                >
+                  Marca: {brand}
+                  <span className="text-gray-400 group-hover:text-red-500">✕</span>
+                </button>
+              ))}
+              
+              {activeSizesArray.map(size => (
+                <button 
+                  key={`chip-size-${size}`}
+                  onClick={() => onFilterChange('talle', toggleFilter(activeFilters.sizeFilter, size))}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-xs"
+                >
+                  Talle: {size}
+                  <span className="text-gray-400 group-hover:text-red-500">✕</span>
+                </button>
+              ))}
+              
+              {activeColorsArray.map(color => (
+                <button 
+                  key={`chip-color-${color}`}
+                  onClick={() => onFilterChange('color', toggleFilter(activeFilters.colorFilter, color))}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-xs"
+                >
+                  Color: {color}
+                  <span className="text-gray-400 group-hover:text-red-500">✕</span>
+                </button>
+              ))}
+              
+              {activeFilters.priceFilter && (
+                <button 
+                  onClick={() => onFilterChange('precio', null)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 hover:border-red-300 hover:text-red-500 text-[10px] font-bold uppercase transition-colors rounded-full group cursor-pointer shadow-xs"
+                >
+                  Precio: {getPriceLabel(activeFilters.priceFilter)}
+                  <span className="text-gray-400 group-hover:text-red-500">✕</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -301,7 +289,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     isActive ? 'text-black font-black' : 'text-gray-500 font-bold hover:text-black'
                   }`}
                 >
-                  {/* SIN EL PUNTO NEGRO, SOLO TEXTO EN NEGRITA */}
                   {brand}
                 </button>
               );

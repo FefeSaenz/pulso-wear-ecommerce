@@ -217,7 +217,8 @@ const Products: React.FC = () => {
                             <i className="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                    {/* SOLUCIÓN UX MASTER: px-6 pb-6 pt-0 (Removimos el padding top que causaba la fuga de scroll) */}
+                    <div className="px-6 pb-6 pt-0 overflow-y-auto flex-1 custom-scrollbar">
                         <FilterSidebar 
                             activeFilters={{ sizeFilter, colorFilter, priceFilter, searchTerm, brandFilter }}
                             categories={categories}
