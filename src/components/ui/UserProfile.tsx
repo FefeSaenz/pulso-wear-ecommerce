@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Order } from '@/src/types/product.types';
 import { useAuth } from '@/src/context/AuthContext';
 import { useOtpAuth } from '@/src/hooks/useOtpAuth';
+import { isValidEmail } from '@/src/utils/validators';
 import { toast } from 'sonner';
 import Price from './Price';
 
@@ -19,8 +20,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
   
   // LÓGICA DE OTP DENTRO DEL HOOK USEOTPAUTH
   const { 
-    email, setEmail, otpCode, setOtpCode, loading, timeLeft, 
-    isCodeSent, sendOtp, verifyOtp, clearOtpData, syncState 
+    email, setEmail, otpCode, setOtpCode, loading, timeLeft, cooldown, isCodeSent, sendOtp, verifyOtp, clearOtpData, syncState 
   } = useOtpAuth();
 
   // EFECTO MAESTRO: Si se abre el panel, obligamos a leer la verdad del localStorage
@@ -44,10 +44,12 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
 
   const handleSendCode = async (e?: React.SyntheticEvent) => {
     if (e) e.preventDefault();
-    if (!email || !email.includes('@')) {
+
+    if (!isValidEmail(email)) {
       toast.error('Por favor, ingresá un email válido.');
       return;
     }
+
     // LLAMADA REAL AL BACKEND (delegada al hook)
     const success = await sendOtp(email);
     if (success) {
@@ -214,25 +216,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
                 </form>
               ) : (
                 <form onSubmit={handleVerifyCode} className="space-y-6 animate-in slide-in-from-right duration-300">
-                  <div className="text-center space-y-2">
+                  <div className="text-center space-y-2 mb-6">
                     <p className="text-[10px] font-bold text-black uppercase tracking-widest">
-                      Código enviado a <br/><span className="text-gray-500">{email}</span>
+                      Código enviado a <br/><span className="text-gray-500">{email}</span><br />
+                      <span className="text-gray-400 text-[8px] block mt-2">VÁLIDO POR 10 MINUTOS</span>
                     </p>
-                    
-                    {timeLeft > 0 ? (
-                      <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest animate-pulse">
-                        Expira en {formatTime(timeLeft)}
-                      </p>
-                    ) : (
-                      <button 
-                        type="button" 
-                        onClick={() => handleSendCode()} 
-                        className="text-[10px] font-black text-black underline uppercase tracking-widest hover:text-gray-500 transition-colors"
-                      >
-                        Reenviar código
-                      </button>
-                    )}
                   </div>
+
                   {/* FIX IOS ZOOM: text-[16px] md:text-2xl para que no haga zoom pero siga siendo grande en PC */}
                   <input 
                     type="text" 
@@ -242,6 +232,23 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose, orders }) =>
                     maxLength={6}
                     className="w-full border-b border-gray-200 py-4 text-[16px] md:text-2xl font-black text-black focus:border-black outline-none tracking-[10px] placeholder:text-gray-200 transition-colors bg-transparent text-center"
                   />
+                  
+                  <div className="flex flex-col items-center mt-2 mb-6">
+                    {cooldown > 0 ? (
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                        ¿No lo recibiste? Reenviar en {formatTime(cooldown)}
+                      </p>
+                    ) : (
+                      <button 
+                        type="button" 
+                        onClick={() => handleSendCode()} 
+                        className="text-[10px] font-black text-black underline uppercase tracking-widest hover:text-gray-500 transition-colors cursor-pointer"
+                      >
+                        Reenviar código
+                      </button>
+                    )}
+                  </div>
+
                   <div className="flex space-x-3">
                     <button 
                       type="button"

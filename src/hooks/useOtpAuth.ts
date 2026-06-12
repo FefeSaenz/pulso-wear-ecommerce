@@ -7,12 +7,15 @@ export const useOtpAuth = () => {
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [cooldown, setCooldown] = useState(0);
   const [isCodeSent, setIsCodeSent] = useState(false);
 
   const clearOtpData = useCallback(() => {
     localStorage.removeItem('pulso_otp_end');
     localStorage.removeItem('pulso_otp_email');
+    localStorage.removeItem('pulso_otp_cooldown');
     setTimeLeft(0);
+    setCooldown(0);
     setIsCodeSent(false);
     setOtpCode('');
   }, []);
@@ -21,6 +24,7 @@ export const useOtpAuth = () => {
   const syncState = useCallback(() => {
     const savedEndTime = localStorage.getItem('pulso_otp_end');
     const savedEmail = localStorage.getItem('pulso_otp_email');
+    const savedCooldown = localStorage.getItem('pulso_otp_cooldown');
 
     if (savedEndTime && savedEmail) {
       const remaining = Math.floor((parseInt(savedEndTime) - Date.now()) / 1000);
@@ -28,6 +32,14 @@ export const useOtpAuth = () => {
         setEmail(savedEmail);
         setTimeLeft(remaining);
         setIsCodeSent(true);
+
+        // Recuperamos el cooldown si existe y sigue vigente
+        if (savedCooldown) {
+          const cooldownRemaining = Math.floor((parseInt(savedCooldown) - Date.now()) / 1000);
+          if (cooldownRemaining > 0) {
+            setCooldown(cooldownRemaining);
+          }
+        }
       } else {
         clearOtpData();
       }
@@ -43,21 +55,28 @@ export const useOtpAuth = () => {
 
   // --- LÓGICA DEL RELOJ ---
   useEffect(() => {
-    if (timeLeft <= 0) return;
-    const timerId = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
+    if (timeLeft <= 0 && cooldown <= 0) return;
+    const timerId = setInterval(() => {
+      setTimeLeft((prev) => Math.max(0, prev - 1));
+      setCooldown((prev) => Math.max(0, prev - 1)); // Bajamos 1 segundo también al cooldown
+    }, 1000);
     return () => clearInterval(timerId);
-  }, [timeLeft]);
+  }, [timeLeft, cooldown]);
 
   const sendOtp = async (targetEmail: string) => {
     setLoading(true);
     try {
       await requestLoginCode(targetEmail);
-      const expirationTime = Date.now() + 600 * 1000;
+      const expirationTime = Date.now() + 600 * 1000; // 10 minutos
+      const cooldownTime = Date.now() + 60 * 1000; // 60 segundos
+
       localStorage.setItem('pulso_otp_end', expirationTime.toString());
       localStorage.setItem('pulso_otp_email', targetEmail);
+      localStorage.setItem('pulso_otp_cooldown', cooldownTime.toString()); // Guardamos el bloqueo
       
       setEmail(targetEmail);
       setTimeLeft(600);
+      setCooldown(60);
       setIsCodeSent(true);
       setOtpCode('');
       toast.success('¡Código enviado! Revisá tu casilla.');
@@ -95,7 +114,6 @@ export const useOtpAuth = () => {
   };
 
   return {
-    email, setEmail, otpCode, setOtpCode, loading, timeLeft, 
-    isCodeSent, sendOtp, verifyOtp, clearOtpData, syncState
+    email, setEmail, otpCode, setOtpCode, loading, timeLeft, cooldown, isCodeSent, sendOtp, verifyOtp, clearOtpData, syncState
   };
 };

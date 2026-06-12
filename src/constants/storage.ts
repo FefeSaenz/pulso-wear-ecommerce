@@ -1,0 +1,1 @@
+export const CHECKOUT_DRAFT_KEY = 'pulso_checkout_draft';
